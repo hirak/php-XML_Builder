@@ -10,43 +10,23 @@ class XML_Builder_Array extends XML_Builder
 {
     /**
      * 初期化コード。
-     * コンストラクタが多少冗長になるため、コンストラクタとは別物にしてある。
+     * doctypeやオプションは完全に無視する
      *
      */
     public static function __(array $option=array()) {
-        if (is_array($option['doctype'])) {
-            list($qualifiedName, $publicId, $systemId) = $option['doctype'];
-            $impl = new DOMImplementation;
-            $dtype = $impl->createDocumentType($qualifiedName, $publicId, $systemId);
-            $dom = $impl->createDocument(null, null, $dtype);
-            $dom->formatOutput = $option['formatOutput'];
-            $dom->resolveExternals = true;
-            $dom->xmlVersion = $option['version'];
-            $dom->encoding = $option['encoding'];
-        } else {
-            $dom = new DOMDocument($option['version'], $option['encoding']);
-            $dom->formatOutput = $option['formatOutput'];
-        }
-        return new self($dom, $dom);
+        $arr = null;
+        return new self($arr, $arr);
     }
 
-    public function __construct($dom, $elem=null, $parent=null)
+    public function __construct(&$dom, &$elem=null, &$parent=null)
     {
-        $this->_dom = $dom;
-        $this->_elem = $elem;
-        $this->_parent = $parent;
+        $this->_dom =& $dom;
+        $this->_elem =& $elem;
+        $this->_parent =& $parent;
     }
 
     public function _()
     {
-        return $this->_parent;
-    }
-
-    public function _insertBefore()
-    {
-        $this->_parent->_elem->insertBefore(
-            $this->_elem
-        );
         return $this->_parent;
     }
 
@@ -56,65 +36,49 @@ class XML_Builder_Array extends XML_Builder
 
     public function _attr(array $attr=array())
     {
-        $elem = $this->_elem;
+        $elem =& $this->_elem;
         foreach ($attr as $label => $value) {
-            $elem->setAttribute($label, $value);
+            $elem["@$label"] = $value;
         }
         return $this;
     }
 
+    //無視
     public function _CDATA_($str)
     {
-        $cdata = $this->_dom->createCDATASection($str);
-        $this->_elem->appendChild($cdata);
         return $this;
     }
 
     public function _TEXT_($str)
     {
-        $text = $this->_dom->createTextNode($str);
-        $this->_elem->appendChild($text);
         return $this;
     }
 
+    //無視
     public function _COMMENT_($str)
     {
-        $comment = $this->_dom->createComment($str);
-        $this->_elem->appendChild($comment);
         return $this;
     }
 
+    //無視
     public function _PI_($target, $data)
     {
-        $pi = $this->_dom->createProcessingInstruction($target, $data);
-        $this->_elem->appendChild($pi);
         return $this;
-    }
-
-    public function _toHTML()
-    {
-        return $this->_dom->saveHTML();
-    }
-
-    public function _toXML()
-    {
-        return $this->_dom->saveXML();
     }
 
     public function __toString()
     {
-        return $this->_dom->saveXML();
+        return print_r($this->_dom, true);
     }
 
-    public function _echoXML()
+    public function _render()
     {
-        echo $this->_dom->saveXML();
-        return $this;
+        return print_r($this->_dom, true);
     }
 
-    public function _echoHTML()
+    public function _echo()
     {
-        echo $this->_dom->saveHTML();
+        print_r($this->_dom);
         return $this;
     }
 
@@ -148,32 +112,57 @@ class XML_Builder_Array extends XML_Builder
             throw new RuntimeException('そんなメソッドないよ');
         }
 
-        $dom = $this->_dom;
+        $dom =& $this->_dom;
+
+        ////親要素の初期化
+        if ($this->_elem === null) {
+            $this->_elem = array();
+
+        } elseif (is_string($this->_elem)) {
+            $this->_elem = array('$'=>$this->_elem);
+        }
+
         //単独でappendして終わりの場合
         if ('_' === $method[strlen($method) - 1]) {
             $tag = substr($method, 0, -1);
-            $elem = $this->_modify($dom->createElement($tag), $args);
-            $this->_elem->appendChild($elem);
+            $elem = $this->_modify(null, $args);
+            $this->_elem[$tag] = $elem;
             return $this;
 
         //子要素の編集に移る場合
         } else {
-            $elem = $this->_modify($dom->createElement($method), $args);
+            $elem = $this->_modify(null, $args);
+            $this->_elem[$method] = $elem;
             return new self($dom, $elem, $this);
         }
     }
 
-    protected function _modify(DOMNode $elem, array $args) {
-        $dom = $this->_dom;
+    protected function _modify($elem, array $args) {
+        if (count($args) === 1 && is_string($args[0])) {
+            return $args[0];
+        }
+
         foreach ($args as $arg) {
             if (is_array($arg)) {
                 foreach ($arg as $label => $value) {
-                    $elem->setAttribute($label, $value);
+                    $elem["@$label"] = $value;
                 }
             } else {
-                $elem->appendChild($dom->createTextNode($arg));
+                $elem['$'] = $arg;
             }
         }
         return $elem;
+    }
+
+    //数値配列かどうか判定する補助メソッド
+    //添字が数値かつ並び順が揃っていたらtrue
+    //違う場合に即座に返せるようあえてfor文で判定
+    private function isArray($arr) {
+        for (reset($arr), $i=0; list($key)=each($arr);) {
+            if ($i++ !== $key) {
+                return false;
+            }
+        }
+        return true;
     }
 }
