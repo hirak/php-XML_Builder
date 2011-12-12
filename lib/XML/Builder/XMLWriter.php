@@ -58,7 +58,7 @@ class XML_Builder_XMLWriter extends XML_Builder
         return $this->$name();
     }
 
-    public function _attr(array $attr=array())
+    public function _ATTR_(array $attr=array())
     {
         $elem = $this->_elem;
         foreach ($attr as $label => $value) {

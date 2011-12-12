@@ -60,15 +60,12 @@ abstract class XML_Builder
       , NS_ATOM_PUB = 'http://www.w3.org/2007/app'
       , NS_OPENSEARCH = 'http://a9.com/-/spec/opensearch/1.1/'
       , NS_GDATA = 'http://schemas.google.com/g/2005'
+      , NS_RSS_10 = 'http://purl.org/rss/1.0/'
+      , NS_Dublin_Core = ''
     ;
     public $_dom;
     public $_elem;
     public $_parent;
-
-    /**
-     * 属性をセット
-     */
-    abstract public function _attr(array $attr=array());
 
     /**
      * 終端子の処理
@@ -80,22 +77,27 @@ abstract class XML_Builder
     }
 
     /**
-     * CDATAセクションを作成
+     * 属性を追加
+     */
+    abstract public function _ATTR_(array $attr=array());
+
+    /**
+     * CDATAセクションを追加
      */
     abstract public function _CDATA_($str);
 
     /**
-     * テキストノードを作成
+     * テキストノードを追加
      */
     abstract public function _TEXT_($str);
 
     /**
-     * コメントノードを作成
+     * コメントノードを追加
      */
     abstract public function _COMMENT_($str);
 
     /**
-     * ProcessingInstructionを作成
+     * ProcessingInstructionを追加
      */
     abstract public function _PI_($target, $data);
 
