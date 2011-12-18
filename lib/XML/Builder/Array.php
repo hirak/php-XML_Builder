@@ -13,7 +13,7 @@ class XML_Builder_Array extends XML_Builder
      * doctypeやオプションは完全に無視する
      *
      */
-    public static function __(array $option=array()) {
+    public static function _init(array $option=array()) {
         $arr = null;
         return new self($arr, $arr);
     }
@@ -31,7 +31,7 @@ class XML_Builder_Array extends XML_Builder
     }
 
     //属性を追加
-    public function _ATTR_(array $attr=array())
+    public function _attr(array $attr=array())
     {
         $elem =& $this->_elem;
         if ($elem === null) {
@@ -46,7 +46,7 @@ class XML_Builder_Array extends XML_Builder
     }
 
     //テキストノードの追加
-    public function _TEXT_($str)
+    public function _text($str)
     {
         $elem =& $this->_elem;
         if ($elem === null) {
@@ -68,20 +68,20 @@ class XML_Builder_Array extends XML_Builder
     }
 
     //テキストノードの追加と同義
-    public function _CDATA_($str)
+    public function _cdata($str)
     {
-        $this->_TEXT_($str);
+        $this->_text($str);
         return $this;
     }
 
     //無視
-    public function _COMMENT_($str)
+    public function _comment($str)
     {
         return $this;
     }
 
     //無視
-    public function _PI_($target, $data)
+    public function _pi($target, $data)
     {
         return $this;
     }
@@ -188,9 +188,9 @@ class XML_Builder_Array extends XML_Builder
         $childBuilder = new self($dom, $newelem, $this);
         foreach ($args as $arg) {
             if (is_array($arg)) {
-                $childBuilder->_ATTR_($arg);
+                $childBuilder->_attr($arg);
             } else {
-                $childBuilder->_TEXT_($arg);
+                $childBuilder->_text($arg);
             }
         }
 
@@ -213,6 +213,7 @@ class XML_Builder_Array extends XML_Builder
         return true;
     }
 
+    //配列の末尾のキーを取得
     private function _lastKey(&$arr) {
         end($arr);
         $lastkey = key($arr);

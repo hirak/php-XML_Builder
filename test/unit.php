@@ -1,38 +1,96 @@
+#!/usr/bin/env phpunit --colors
 <?php
+/**
+ * テストの起動スクリプト
+ * ひたすらtest*.phpとtest*.xmlの比較を行います。
+ * PHPUnitが必要です。
+ *
+ */
 
 require_once dirname(__FILE__) . '/../lib/XML/Builder.php';
+class XML_BuilderTest extends PHPUnit_Framework_TestCase
+{
+    /**
+     * DOM版で全テストケースを起動
+     *
+     * @dataProvider providerDOM
+     */
+    function testDOM($php, $xml) {
+        $this->assertEquals($php, $xml);
+    }
 
-$builder = xml_builder(array('doctype'=>XML_Builder::$HTML5));
+    function providerDOM()
+    {
+        return new XML_BuilderTestIterator(array('class'=>'dom'));
+    }
 
-$builder
 
-->html
-  ->head
-    ->meta_(array('http-equiv'=>'Content-Type', 'content'=>'text/html; charset=UTF-8'))
-    ->_export($foo);
-//チェーンの途中中断
+    /**
+     * XMLWriter版で全テストケースを起動
+     *
+     * @dataProvider providerXMLWriter
+     */
+//    function testXMLWriter($php, $xml) {
+//        $this->assertEquals($php, $xml);
+//    }
+//    function providerXMLWriter()
+//    {
+//        return array();
+//        //new XML_BuilderTestIterator(array('class'=>'xmlwriter'));
+//    }
 
-//再開
-    $foo
-    ->title_('日本語')
-    ->link_(array('rel'=>'stylesheet'))
-  ->_
+}
 
-  ->body
-    ->div
-      ->h1_('h1')
 
-      //即時関数による埋め込み
-      ->_do(function($chain){
-          $chain->div_('ああああああ');
-      })
+/**
+ * テストのデータプロバイダ。
+ * 全部配列にするとメモリが不安なのでイテレーターを利用する
+ *
+ */
+class XML_BuilderTestIterator implements Iterator
+{
+    private $tests, $xmls, $length, $i=0, $builderOption;
 
-    ->_
-  ->_
-->_
+    function __construct(array $builderOption) {
+        $dir = dirname(__FILE__);
 
-->_export($html)
-;
+        $this->tests = glob($dir . '/test*.php');
+        $this->length = count($this->tests);
+        $this->xmls = glob($dir . '/test*.xml');
+        $this->builderOption = $builderOption;
+    }
 
-//var_dump($moge);
-echo $html->_render('html');
+    private function _getTest() {
+        $builder = xml_builder($this->builderOption);
+        ob_start();
+            include $this->tests[$this->i];
+        return ob_get_clean();
+    }
+
+    private function _getXml() {
+        return file_get_contents($this->xmls[$this->i]);
+    }
+
+    function current() {
+        return array(
+            $this->_getTest(),
+            $this->_getXml()
+        );
+    }
+
+    function key() {
+        return $this->i;
+    }
+
+    function next() {
+        $this->i++;
+    }
+
+    function rewind() {
+        $this->i = 0;
+    }
+
+    function valid() {
+        return $this->i < $this->length;
+    }
+}

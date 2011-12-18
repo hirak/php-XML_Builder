@@ -34,7 +34,7 @@ function xml_builder(array $option=array()) {
     }
 
     $class = $option['class'];
-    return $class::__($option);
+    return $class::_init($option);
 }
 
 /**
@@ -79,27 +79,27 @@ abstract class XML_Builder
     /**
      * 属性を追加
      */
-    abstract public function _ATTR_(array $attr=array());
+    abstract public function _attr(array $attr=array());
 
     /**
      * CDATAセクションを追加
      */
-    abstract public function _CDATA_($str);
+    abstract public function _cdata($str);
 
     /**
      * テキストノードを追加
      */
-    abstract public function _TEXT_($str);
+    abstract public function _text($str);
 
     /**
      * コメントノードを追加
      */
-    abstract public function _COMMENT_($str);
+    abstract public function _comment($str);
 
     /**
      * ProcessingInstructionを追加
      */
-    abstract public function _PI_($target, $data);
+    abstract public function _pi($target, $data);
 
     abstract public function __toString();
 

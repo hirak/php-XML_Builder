@@ -12,7 +12,7 @@ class XML_Builder_DOM extends XML_Builder
      * コンストラクタが多少冗長になるため、コンストラクタとは別物にしてある。
      *
      */
-    public static function __(array $option=array()) {
+    public static function _init(array $option=array()) {
         if (is_array($option['doctype'])) {
             list($qualifiedName, $publicId, $systemId) = $option['doctype'];
             $impl = new DOMImplementation;
@@ -53,7 +53,7 @@ class XML_Builder_DOM extends XML_Builder
         return $this->$name();
     }
 
-    public function _ATTR_(array $attr=array())
+    public function _attr(array $attr=array())
     {
         $elem = $this->_elem;
         foreach ($attr as $label => $value) {
@@ -62,28 +62,28 @@ class XML_Builder_DOM extends XML_Builder
         return $this;
     }
 
-    public function _CDATA_($str)
+    public function _cdata($str)
     {
         $cdata = $this->_dom->createCDATASection($str);
         $this->_elem->appendChild($cdata);
         return $this;
     }
 
-    public function _TEXT_($str)
+    public function _text($str)
     {
         $text = $this->_dom->createTextNode($str);
         $this->_elem->appendChild($text);
         return $this;
     }
 
-    public function _COMMENT_($str)
+    public function _comment($str)
     {
         $comment = $this->_dom->createComment($str);
         $this->_elem->appendChild($comment);
         return $this;
     }
 
-    public function _PI_($target, $data)
+    public function _pi($target, $data)
     {
         $pi = $this->_dom->createProcessingInstruction($target, $data);
         $this->_elem->appendChild($pi);
