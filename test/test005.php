@@ -3,10 +3,10 @@
  * 子要素
  *
  */
-$builder
+return $builder
 
 ->root
     ->child_
 ->_
 
-->_echo;
+;

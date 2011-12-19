@@ -9,49 +9,41 @@
 
 class XML_Builder_XMLWriter extends XML_Builder
 {
+    public $_writer;
     /**
      * 初期化コード。
      * コンストラクタが多少冗長になるため、コンストラクタとは別物にしてある。
+     * @param writeto memory 書き込み先
      *
      */
     public static function _init(array $option=array()) {
+        $writer = new XMLWriter;
+        if (isset($option['writeto']) && $option['writeto']!=='memory') {
+            $writer->openURI($option['writeto']);
+        } else {
+            $writer->openMemory();
+        }
+        if ($option['formatOutput']) {
+            $writer->setIndentString('  ');
+            $writer->setIndent(true);
+        }
+        $writer->startDocument($option['version'], $option['encoding']);
         if (is_array($option['doctype'])) {
             list($qualifiedName, $publicId, $systemId) = $option['doctype'];
-            $impl = new DOMImplementation;
-            $dtype = $impl->createDocumentType($qualifiedName, $publicId, $systemId);
-            $dom = $impl->createDocument(null, null, $dtype);
-            $dom->formatOutput = $option['formatOutput'];
-            $dom->resolveExternals = true;
-            $dom->xmlVersion = $option['version'];
-            $dom->encoding = $option['encoding'];
-        } else {
-            $dom = new DOMDocument($option['version'], $option['encoding']);
-            $dom->formatOutput = $option['formatOutput'];
+            $writer->writeDTD($qualifiedName, $publicId, $systemId);
         }
-        return new self($dom, $dom);
+        return new self($writer);
     }
 
-    public function __construct($dom, $elem=null, $parent=null)
+    public function __construct($writer)
     {
-        $this->_dom = $dom;
-        $this->_elem = $elem;
-        $this->_parent = $parent;
+        $this->_writer = $writer;
     }
 
     public function _()
     {
-        $this->_parent->_elem->appendChild(
-            $this->_elem
-        );
-        return $this->_parent;
-    }
-
-    public function _insertBefore()
-    {
-        $this->_parent->_elem->insertBefore(
-            $this->_elem
-        );
-        return $this->_parent;
+        $this->_writer->endElement();
+        return $this;
     }
 
     public function __get($name) {
@@ -60,44 +52,40 @@ class XML_Builder_XMLWriter extends XML_Builder
 
     public function _attr(array $attr=array())
     {
-        $elem = $this->_elem;
+        $writer = $this->_writer;
         foreach ($attr as $label => $value) {
-            $elem->setAttribute($label, $value);
+            $writer->writeAttribute($label, $value);
         }
         return $this;
     }
 
     public function _cdata($str)
     {
-        $cdata = $this->_dom->createCDATASection($str);
-        $this->_elem->appendChild($cdata);
+        $this->_writer->writeCData($str);
         return $this;
     }
 
     public function _text($str)
     {
-        $text = $this->_dom->createTextNode($str);
-        $this->_elem->appendChild($text);
+        $this->_writer->text($str);
         return $this;
     }
 
     public function _comment($str)
     {
-        $comment = $this->_dom->createComment($str);
-        $this->_elem->appendChild($comment);
+        $this->_writer->writeComment($str);
         return $this;
     }
 
     public function _pi($target, $data)
     {
-        $pi = $this->_dom->createProcessingInstruction($target, $data);
-        $this->_elem->appendChild($pi);
+        $this->_writer->writePI($target, $data);
         return $this;
     }
 
     public function __toString()
     {
-        return $this->_dom->saveXML();
+        return $this->_writer->outputMemory();
     }
 
     /**
@@ -130,32 +118,32 @@ class XML_Builder_XMLWriter extends XML_Builder
             throw new RuntimeException('そんなメソッドないよ');
         }
 
-        $dom = $this->_dom;
+        $writer = $this->_writer;
         //単独でappendして終わりの場合
         if ('_' === $method[strlen($method) - 1]) {
             $tag = substr($method, 0, -1);
-            $elem = $this->_modify($dom->createElement($tag), $args);
-            $this->_elem->appendChild($elem);
-            return $this;
+            $writer->startElement($tag);
+            $this->_modify($args);
+            $writer->endElement();
 
         //子要素の編集に移る場合
         } else {
-            $elem = $this->_modify($dom->createElement($method), $args);
-            return new self($dom, $elem, $this);
+            $writer->startElement($method);
+            $this->_modify($args);
         }
+        return $this;
     }
 
-    protected function _modify(DOMNode $elem, array $args) {
-        $dom = $this->_dom;
+    protected function _modify(array $args) {
+        $writer = $this->_writer;
         foreach ($args as $arg) {
             if (is_array($arg)) {
                 foreach ($arg as $label => $value) {
-                    $elem->setAttribute($label, $value);
+                    $writer->writeAttribute($label, $value);
                 }
             } else {
-                $elem->appendChild($dom->createTextNode($arg));
+                $writer->text($arg);
             }
         }
-        return $elem;
     }
 }

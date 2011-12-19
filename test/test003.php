@@ -3,9 +3,7 @@
  * ->rootと->_に分けて書いた場合
  *
  */
-$builder
-
+return $builder 
     ->root
     ->_
-
-->_echo;
+;

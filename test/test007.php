@@ -3,8 +3,8 @@
  * attributeとstr
  *
  */
-$builder
+return $builder
 
 ->root_(array('attr'=>'attr1'), 'str')
 
-->_echo;
+;

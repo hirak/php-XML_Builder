@@ -2,10 +2,9 @@
 /**
  * PI
  */
-$builder
+return $builder
 
-->root
-    ->_pi('php', 'echo "HelloWorld"')
-->_
+->_pi('php', 'echo "HelloWorld"')
+->root_
 
-->_echo;
+;

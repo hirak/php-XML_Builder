@@ -3,7 +3,7 @@
  * 入れ子の入れ子
  *
  */
-$builder
+return $builder
 
 ->root
     ->child
@@ -11,4 +11,4 @@ $builder
     ->_
 ->_
 
-->_echo;
+;

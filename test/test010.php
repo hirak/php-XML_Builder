@@ -3,10 +3,10 @@
  * Comment
  *
  */
-$builder
+return $builder
 
 ->root
     ->_comment('hogehoge')
 ->_
 
-->_echo;
+;

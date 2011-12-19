@@ -3,11 +3,11 @@
  * 要素を複数追加
  *
  */
-$builder
+return $builder
 
 ->root
     ->child_('1')
     ->child_('2')
 ->_
 
-->_echo;
+;

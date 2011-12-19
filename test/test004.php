@@ -4,11 +4,10 @@
  *
  */
 
-$builder
+return $builder
 
 ->root
     ->_text('str')
 ->_
 
-
-->_echo;
+;

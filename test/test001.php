@@ -5,6 +5,4 @@
  * ：空っぽの要素を追加するだけ
  *
  */
-$builder
-    ->root_
-->_echo();
+return $builder->root_;

@@ -2,8 +2,4 @@
 /**
  * テキストの追加
  */
-$builder
-
-->root_('str')
-
-->_echo();
+return $builder->root_('str');

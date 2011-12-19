@@ -6,91 +6,39 @@
  * PHPUnitが必要です。
  *
  */
+error_reporting(E_ALL|E_STRICT);
 
 require_once dirname(__FILE__) . '/../lib/XML/Builder.php';
 class XML_BuilderTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * DOM版で全テストケースを起動
+     * 全テストケースを起動
      *
-     * @dataProvider providerDOM
      */
-    function testDOM($php, $xml) {
-        $this->assertEquals($php, $xml);
-    }
-
-    function providerDOM()
-    {
-        return new XML_BuilderTestIterator(array('class'=>'dom'));
-    }
-
-
-    /**
-     * XMLWriter版で全テストケースを起動
-     *
-     * @dataProvider providerXMLWriter
-     */
-//    function testXMLWriter($php, $xml) {
-//        $this->assertEquals($php, $xml);
-//    }
-//    function providerXMLWriter()
-//    {
-//        return array();
-//        //new XML_BuilderTestIterator(array('class'=>'xmlwriter'));
-//    }
-
-}
-
-
-/**
- * テストのデータプロバイダ。
- * 全部配列にするとメモリが不安なのでイテレーターを利用する
- *
- */
-class XML_BuilderTestIterator implements Iterator
-{
-    private $tests, $xmls, $length, $i=0, $builderOption;
-
-    function __construct(array $builderOption) {
+    function testAll() {
         $dir = dirname(__FILE__);
+        $tests = glob($dir . '/test*.php');
+        $xmls = glob($dir . '/test*.xml');
+        $length = min(count($tests), count($xmls));
 
-        $this->tests = glob($dir . '/test*.php');
-        $this->length = count($this->tests);
-        $this->xmls = glob($dir . '/test*.xml');
-        $this->builderOption = $builderOption;
+        for ($i=0; $i<$length; $i++) {
+            $builder = xml_builder();
+
+            $php = include $tests[$i];
+            $php = (string)$php;
+            $xml = file_get_contents($xmls[$i]);
+            $this->assertEquals($xml, $php, $tests[$i]);
+        }
+
+        for ($i=0; $i<$length; $i++) {
+            $builder = xml_builder(array('class'=>'xmlwriter'));
+
+            $php = include $tests[$i];
+            $php = (string)$php;
+            $xml = file_get_contents($xmls[$i]);
+            $this->assertEquals($xml, $php, $tests[$i]);
+        }
+
     }
 
-    private function _getTest() {
-        $builder = xml_builder($this->builderOption);
-        ob_start();
-            include $this->tests[$this->i];
-        return ob_get_clean();
-    }
-
-    private function _getXml() {
-        return file_get_contents($this->xmls[$this->i]);
-    }
-
-    function current() {
-        return array(
-            $this->_getTest(),
-            $this->_getXml()
-        );
-    }
-
-    function key() {
-        return $this->i;
-    }
-
-    function next() {
-        $this->i++;
-    }
-
-    function rewind() {
-        $this->i = 0;
-    }
-
-    function valid() {
-        return $this->i < $this->length;
-    }
 }
