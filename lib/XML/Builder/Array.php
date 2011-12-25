@@ -160,11 +160,10 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
     //数値配列かどうか判定する補助メソッド
     // 添字が数値かつ並び順が揃っていたらtrue
     private function _isArray($arr) {
+        if (!is_array($arr)) return false;
         //違う場合に即座に返せるようあえてfor文で判定
         for (reset($arr), $i=0; list($key)=each($arr);) {
-            if ($i++ !== $key) {
-                return false;
-            }
+            if ($i++ !== $key) return false;
         }
         return true;
     }

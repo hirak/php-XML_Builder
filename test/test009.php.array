@@ -1,0 +1,8 @@
+<?php
+return array(
+    'root' => array(
+        'child' => array(
+            'child2' => 'str',
+        ),
+    ),
+);

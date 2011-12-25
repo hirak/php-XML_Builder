@@ -1,0 +1,6 @@
+<?php
+return array(
+    'root' => array(
+        'child' => array('1','2')
+    ),
+);

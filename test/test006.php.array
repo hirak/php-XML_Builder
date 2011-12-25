@@ -1,0 +1,6 @@
+<?php
+return array(
+    'root' => array(
+        '@attr' => 'attr1'
+    )
+);
