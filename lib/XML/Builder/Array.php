@@ -6,20 +6,27 @@
  *
  */
 if (!class_exists('XML_Builder_Abstract',false)) require_once dirname(__FILE__).'/Abstract.php';
-class XML_Builder_Array extends XML_Builder_Abstract
+//for version < PHP5.4
+if (!interface_exists('JsonSerializable',false)) {
+    interface JsonSerializable {
+        function jsonSerialize();
+    }
+}
+class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
 {
     public $xmlArray, $xmlCurrentElem, $xmlParent;
 
-    public function __construct()
+    public function __construct(&$array, &$elem=null, &$parent=null)
     {
-        if (func_num_args() === 1) {
-            $this->xmlArray = null;
-            $this->xmlCurrentElem = null;
+        if ($parent === null) {
+            $newelem = null;
+            $this->xmlArray =& $newelem;
+            $this->xmlCurrentElem =& $newelem;
             return;
         }
-        $this->xmlArray =& func_get_arg(0);
-        $this->xmlCurrentElem =& func_get_arg(1);
-        $this->xmlParent =& func_get_arg(2);
+        $this->xmlArray =& $array;
+        $this->xmlCurrentElem =& $elem;
+        $this->xmlParent =& $parent;
     }
 
     public function xmlEnd()
@@ -101,50 +108,39 @@ class XML_Builder_Array extends XML_Builder_Abstract
         return $this;
     }
 
-    public function xmlElem($method)
+    public function xmlElem($name)
     {
-        if ('_' === $method[0]) {
-            throw new RuntimeException('missing method');
-        }
-
         $dom =& $this->xmlArray;
         $elem =& $this->xmlCurrentElem;
-
-        //ラベル名抽出
-        if ('_' === $method[strlen($method) - 1]) {
-            $label = substr($method, 0, -1);
-        } else {
-            $label = $method;
-        }
 
         $newelem = null;
         //parent: null
         if ($elem === null) {
-            $elem = array($label=>&$newelem);
+            $elem = array($name=>&$newelem);
 
         //parent: "string"
         } elseif (is_string($elem)) {
             $str = $elem;
-            $elem = array('$'=>$str, $label=>&$newelem);
+            $elem = array('$'=>array($str, array($name=>&$newelem)));
 
         //parent: [$:[]]
         } elseif (isset($elem['$']) && is_array($elem['$'])) {
-            $elem['$'][] = array($label=>&$newelem);
+            $elem['$'][] = array($name=>&$newelem);
 
-        //parent: [hoge: "fuga"] ($labelがまだ存在しないケース
-        } elseif (!array_key_exists($label, $elem)) {
-            $elem[$label] =& $newelem;
+        //parent: [hoge: "fuga"] ($nameがまだ存在しないケース
+        } elseif (!array_key_exists($name, $elem)) {
+            $elem[$name] =& $newelem;
 
-        //parent: [$label: "hoge"] ($labelが存在し、配列中の末尾であるケース
-        } elseif ($this->_lastKey($elem) === $label) {
-            if ($this->_isArray($elem[$label])) {
-                $elem[$label][] =& $newelem;
+        //parent: [$name: "hoge"] ($nameが存在し、配列中の末尾であるケース
+        } elseif ($this->_lastKey($elem) === $name) {
+            if ($this->_isArray($elem[$name])) {
+                $elem[$name][] =& $newelem;
             } else {
-                $old = $elem[$label];
-                $elem[$label] = array($old, &$newelem);
+                $old = $elem[$name];
+                $elem[$name] = array($old, &$newelem);
             }
 
-        //parent: [$label: "hoge", hoge: "fuu"] ($labelは存在するが、配列の末尾でないケース
+        //parent: [$name: "hoge", hoge: "fuu"] ($nameは存在するが、配列の末尾でないケース
         } else {
             $oldelem = $elem;
             $elem = array('$'=>array());
@@ -155,23 +151,10 @@ class XML_Builder_Array extends XML_Builder_Abstract
                     $elem['$'][] = array($key => $val);
                 }
             }
-            $elem['$'][] = array($label => &$newelem);
+            $elem['$'][] = array($name => &$newelem);
         }
 
-        $childBuilder = new self($dom, $newelem, $this);
-        foreach ($args as $arg) {
-            if (is_array($arg)) {
-                $childBuilder->xmlAttr($arg);
-            } else {
-                $childBuilder->xmlText($arg);
-            }
-        }
-
-        if ('_' === $method[strlen($method) - 1]) {
-            return $this;
-        } else {
-            return $childBuilder;
-        }
+        return new self($dom, $newelem, $this);
     }
 
     //数値配列かどうか判定する補助メソッド
@@ -192,5 +175,15 @@ class XML_Builder_Array extends XML_Builder_Abstract
         $lastkey = key($arr);
         reset($arr);
         return $lastkey;
+    }
+
+    //for PHP5.4(json_encode)
+    public function jsonSerialize() {
+        return $this->xmlArray;
+    }
+
+    //for Zend_Json
+    public function toJson() {
+        return json_encode($this->xmlArray);
     }
 }

@@ -37,6 +37,16 @@ class XML_BuilderTest extends PHPUnit_Framework_TestCase
             $this->assertXmlStringEqualsXmlFile($xmls[$i], $php, $tests[$i]);
         }
 
+        $arrays = glob($dir . '/test*.php.array');
+        $length = min(count($tests), count($arrays));
+
+        for ($i=0; $i<$length; $i++) {
+            $builder = XML_Builder::factory(array('class'=>'array'));
+
+            $php = include $tests[$i];
+            $arr = include $arrays[$i];
+            $this->assertEquals($arr, $php->xmlArray, $tests[$i]);
+        }
     }
 
 }
