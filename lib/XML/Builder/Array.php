@@ -5,35 +5,32 @@
  *
  *
  */
-
-class XML_Builder_Array extends XML_Builder
+if (!class_exists('XML_Builder_Abstract',false)) require_once dirname(__FILE__).'/Abstract.php';
+class XML_Builder_Array extends XML_Builder_Abstract
 {
-    /**
-     * 初期化コード。
-     * doctypeやオプションは完全に無視する
-     *
-     */
-    public static function _init(array $option=array()) {
-        $arr = null;
-        return new self($arr, $arr);
+    public $xmlArray, $xmlCurrentElem, $xmlParent;
+
+    public function __construct()
+    {
+        if (func_num_args() === 1) {
+            $this->xmlArray = null;
+            $this->xmlCurrentElem = null;
+            return;
+        }
+        $this->xmlArray =& func_get_arg(0);
+        $this->xmlCurrentElem =& func_get_arg(1);
+        $this->xmlParent =& func_get_arg(2);
     }
 
-    public function __construct(&$dom, &$elem=null, &$parent=null)
+    public function xmlEnd()
     {
-        $this->_dom =& $dom;
-        $this->_elem =& $elem;
-        $this->_parent =& $parent;
-    }
-
-    public function _()
-    {
-        return $this->_parent;
+        return $this->xmlParent;
     }
 
     //属性を追加
-    public function _attr(array $attr=array())
+    public function xmlAttr(array $attr=array())
     {
-        $elem =& $this->_elem;
+        $elem =& $this->xmlCurrentElem;
         if ($elem === null) {
             $elem = array();
         } elseif (is_string($elem)) {
@@ -46,9 +43,9 @@ class XML_Builder_Array extends XML_Builder
     }
 
     //テキストノードの追加
-    public function _text($str)
+    public function xmlText($str)
     {
-        $elem =& $this->_elem;
+        $elem =& $this->xmlCurrentElem;
         if ($elem === null) {
             $elem = $str;
         } elseif (is_string($elem)) {
@@ -68,74 +65,50 @@ class XML_Builder_Array extends XML_Builder
     }
 
     //テキストノードの追加と同義
-    public function _cdata($str)
+    public function xmlCdata($str)
     {
-        $this->_text($str);
+        $this->xmlText($str);
         return $this;
     }
 
     //無視
-    public function _comment($str)
+    public function xmlComment($str)
     {
         return $this;
     }
 
     //無視
-    public function _pi($target, $data)
+    public function xmlPi($target, $data)
     {
         return $this;
     }
 
     public function __toString()
     {
-        return $this->_render();
+        return $this->xmlRender();
     }
 
-    public function _render()
+    public function xmlRender()
     {
         ob_start();
-        var_dump($this->_dom);
+        var_dump($this->xmlArray);
         return ob_get_clean();
     }
 
-    public function _echo()
+    public function xmlEcho()
     {
-        var_dump($this->_dom);
+        var_dump($this->xmlArray);
         return $this;
     }
 
-    /**
-     * 引数にthisを渡して処理を中断できるようにする
-     *
-     *
-     */
-    public function _export(&$ref)
-    {
-        $ref = $this;
-        return $this;
-    }
-
-    /**
-     * thisを引数に渡して任意のコールバックを実行する
-     *
-     */
-    public function _do($callback)
-    {
-        if (is_callable($callback)) {
-            call_user_func($callback, $this);
-            return $this;
-        }
-        throw new RuntimeException();
-    }
-
-    public function __call($method, $args)
+    public function xmlElem($method)
     {
         if ('_' === $method[0]) {
             throw new RuntimeException('missing method');
         }
 
-        $dom =& $this->_dom;
-        $elem =& $this->_elem;
+        $dom =& $this->xmlArray;
+        $elem =& $this->xmlCurrentElem;
 
         //ラベル名抽出
         if ('_' === $method[strlen($method) - 1]) {
@@ -188,9 +161,9 @@ class XML_Builder_Array extends XML_Builder
         $childBuilder = new self($dom, $newelem, $this);
         foreach ($args as $arg) {
             if (is_array($arg)) {
-                $childBuilder->_attr($arg);
+                $childBuilder->xmlAttr($arg);
             } else {
-                $childBuilder->_text($arg);
+                $childBuilder->xmlText($arg);
             }
         }
 

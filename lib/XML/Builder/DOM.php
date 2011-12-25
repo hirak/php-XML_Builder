@@ -5,168 +5,105 @@
  *
  */
 
-class XML_Builder_DOM extends XML_Builder
+if (!class_exists('XML_Builder_Abstract',false)) require_once dirname(__FILE__).'/Abstract.php';
+class XML_Builder_DOM extends XML_Builder_Abstract
 {
-    /**
-     * 初期化コード。
-     * コンストラクタが多少冗長になるため、コンストラクタとは別物にしてある。
-     *
-     */
-    public static function _init(array $option=array()) {
-        if (is_array($option['doctype'])) {
-            list($qualifiedName, $publicId, $systemId) = $option['doctype'];
-            $impl = new DOMImplementation;
-            $dtype = $impl->createDocumentType($qualifiedName, $publicId, $systemId);
-            $dom = $impl->createDocument(null, null, $dtype);
-            $dom->formatOutput = $option['formatOutput'];
-            $dom->resolveExternals = true;
-            $dom->xmlVersion = $option['version'];
-            $dom->encoding = $option['encoding'];
+    public $xmlDom, $xmlCurrentElem, $xmlParent;
+
+    public function __construct()
+    {
+        if (func_num_args() === 1) {
+            $option = func_get_arg(0);
+            if (is_array($option['doctype'])) {
+                list($qualifiedName, $publicId, $systemId) = $option['doctype'];
+                $impl = new DOMImplementation;
+                $dtype = $impl->createDocumentType($qualifiedName, $publicId, $systemId);
+                $dom = $impl->createDocument(null, null, $dtype);
+                $dom->formatOutput = $option['formatOutput'];
+                $dom->resolveExternals = true;
+                $dom->xmlVersion = $option['version'];
+                $dom->encoding = $option['encoding'];
+            } else {
+                $dom = new DOMDocument($option['version'], $option['encoding']);
+                $dom->formatOutput = $option['formatOutput'];
+            }
+            $this->xmlDom = $dom;
+            $this->xmlCurrentElem = $dom;
         } else {
-            $dom = new DOMDocument($option['version'], $option['encoding']);
-            $dom->formatOutput = $option['formatOutput'];
+            list(
+                $this->xmlDom,
+                $this->xmlCurrentElem,
+                $this->xmlParent
+            ) = func_get_args();
         }
-        return new self($dom, $dom);
     }
 
-    public function __construct($dom, $elem=null, $parent=null)
+    public function xmlElem($name)
     {
-        $this->_dom = $dom;
-        $this->_elem = $elem;
-        $this->_parent = $parent;
+        $elem = $this->xmlDom->createElement($name);
+        $this->xmlCurrentElem->appendChild($elem);
+        return new self($this->xmlDom, $elem, $this);
     }
 
-    public function _()
+    public function xmlEnd()
     {
-        return $this->_parent;
+        return $this->xmlParent;
     }
 
-    public function _insertBefore()
+    public function xmlAttr(array $attr=array())
     {
-        $this->_parent->_elem->insertBefore(
-            $this->_elem
-        );
-        return $this->_parent;
-    }
-
-    public function __get($name) {
-        return $this->$name();
-    }
-
-    public function _attr(array $attr=array())
-    {
-        $elem = $this->_elem;
+        $elem = $this->xmlCurrentElem;
         foreach ($attr as $label => $value) {
             $elem->setAttribute($label, $value);
         }
         return $this;
     }
 
-    public function _cdata($str)
+    public function xmlCdata($str)
     {
-        $cdata = $this->_dom->createCDATASection($str);
-        $this->_elem->appendChild($cdata);
+        $cdata = $this->xmlDom->createCDATASection($str);
+        $this->xmlCurrentElem->appendChild($cdata);
         return $this;
     }
 
-    public function _text($str)
+    public function xmlText($str)
     {
-        $text = $this->_dom->createTextNode($str);
-        $this->_elem->appendChild($text);
+        $text = $this->xmlDom->createTextNode($str);
+        $this->xmlCurrentElem->appendChild($text);
         return $this;
     }
 
-    public function _comment($str)
+    public function xmlComment($str)
     {
-        $comment = $this->_dom->createComment($str);
-        $this->_elem->appendChild($comment);
+        $comment = $this->xmlDom->createComment($str);
+        $this->xmlCurrentElem->appendChild($comment);
         return $this;
     }
 
-    public function _pi($target, $data)
+    public function xmlPi($target, $data)
     {
-        $pi = $this->_dom->createProcessingInstruction($target, $data);
-        $this->_elem->appendChild($pi);
+        $pi = $this->xmlDom->createProcessingInstruction($target, $data);
+        $this->xmlCurrentElem->appendChild($pi);
         return $this;
     }
 
-    public function _render($format='xml')
+    public function xmlRender($format='xml')
     {
         if ($format === 'html') {
-            return $this->_dom->saveHTML();
+            return $this->xmlDom->saveHTML();
         } else {
-            return $this->_dom->saveXML();
+            return $this->xmlDom->saveXML();
         }
     }
 
-    public function _echo($format='xml')
+    public function xmlEcho($format='xml')
     {
-        echo $this->_render($format);
+        echo $this->xmlRender($format);
         return $this;
     }
 
     public function __toString()
     {
-        return $this->_render();
+        return $this->xmlRender();
     }
-
-
-    /**
-     * 引数にthisを渡して処理を中断できるようにする
-     */
-    public function _export(&$ref)
-    {
-        $ref = $this;
-        return $this;
-    }
-
-    /**
-     * thisを引数に渡して任意のコールバックを実行する
-     *
-     */
-    public function _do($callback)
-    {
-        if (is_callable($callback)) {
-            call_user_func($callback, $this);
-            return $this;
-        }
-        throw new RuntimeException();
-    }
-
-    public function __call($method, $args)
-    {
-        if ('_' === $method[0]) {
-            throw new RuntimeException('そんなメソッドないよ');
-        }
-
-        $dom = $this->_dom;
-        //単独でappendして終わりの場合
-        if ('_' === $method[strlen($method) - 1]) {
-            $tag = substr($method, 0, -1);
-            $elem = $this->_modify($dom->createElement($tag), $args);
-            $this->_elem->appendChild($elem);
-            return $this;
-
-        //子要素の編集に移る場合
-        } else {
-            $elem = $this->_modify($dom->createElement($method), $args);
-            $this->_elem->appendChild($elem);
-            return new self($dom, $elem, $this);
-        }
-    }
-
-    protected function _modify(DOMNode $elem, array $args) {
-        $dom = $this->_dom;
-        foreach ($args as $arg) {
-            if (is_array($arg)) {
-                foreach ($arg as $label => $value) {
-                    $elem->setAttribute($label, $value);
-                }
-            } else {
-                $elem->appendChild($dom->createTextNode($arg));
-            }
-        }
-        return $elem;
-    }
-
 }

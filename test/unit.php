@@ -22,21 +22,19 @@ class XML_BuilderTest extends PHPUnit_Framework_TestCase
         $length = min(count($tests), count($xmls));
 
         for ($i=0; $i<$length; $i++) {
-            $builder = xml_builder();
+            $builder = XML_Builder::factory();
 
             $php = include $tests[$i];
             $php = (string)$php;
-            $xml = file_get_contents($xmls[$i]);
-            $this->assertEquals($xml, $php, $tests[$i]);
+            $this->assertXmlStringEqualsXmlFile($xmls[$i], $php, $tests[$i]);
         }
 
         for ($i=0; $i<$length; $i++) {
-            $builder = xml_builder(array('class'=>'xmlwriter'));
+            $builder = XML_Builder::factory(array('class'=>'xmlwriter'));
 
             $php = include $tests[$i];
             $php = (string)$php;
-            $xml = file_get_contents($xmls[$i]);
-            $this->assertEquals($xml, $php, $tests[$i]);
+            $this->assertXmlStringEqualsXmlFile($xmls[$i], $php, $tests[$i]);
         }
 
     }

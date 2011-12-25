@@ -12,7 +12,7 @@ XMLの生成コードを短く書くためのライブラリです。まだ開�
 <?php
 require_once 'path/to/XML/Builder.php';
 
-xml_builder(array('doctype'=>XML_Builder::XHTML11))
+XML_Builder::factory(array('doctype'=>XML_Builder::$XHTML11))
 ->html(array('xmlns'=>XML_Builder::NS_XHTML))
     ->head
         ->meta_(array('http-equiv'=>'Content-Type','content'=>'text/html; charset=UTF-8'))
@@ -35,6 +35,7 @@ xml_builder(array('doctype'=>XML_Builder::XHTML11))
 * 選べるバックエンド ・・・DOMかXMLWriterを選べます。
 * 独自のDSL ・・・XMLを文字列で書くより短く書けます。
 * 安心 ・・・DOMやXMLWriterのWrapperに徹しており、これらをきちんと使うことで安全なXMLを生成できます。
+* 配列とDOMの相互変換機能・・・実装予定
 
 
 LISENCE

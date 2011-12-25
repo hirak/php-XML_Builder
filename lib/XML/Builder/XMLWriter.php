@@ -4,19 +4,24 @@
  * メモリの消費が少なく、出力先に直接流すことができるが、機能がDOMより制限される
  *
  *
- *
  */
 
-class XML_Builder_XMLWriter extends XML_Builder
+if (!class_exists('XML_Builder_Abstract',false)) require_once dirname(__FILE__).'/Abstract.php';
+class XML_Builder_XMLWriter extends XML_Builder_Abstract
 {
-    public $_writer;
+    public $xmlWriter;
+
     /**
-     * 初期化コード。
-     * コンストラクタが多少冗長になるため、コンストラクタとは別物にしてある。
-     * @param writeto memory 書き込み先
-     *
+     * @param writeto 書き込み先を指定
      */
-    public static function _init(array $option=array()) {
+    public function __construct($writer)
+    {
+        if ($writer instanceof XMLWriter) {
+            $this->xmlWriter = $writer;
+            return;
+        }
+
+        $option = $writer;
         $writer = new XMLWriter;
         if (isset($option['writeto']) && $option['writeto']!=='memory') {
             $writer->openURI($option['writeto']);
@@ -32,118 +37,56 @@ class XML_Builder_XMLWriter extends XML_Builder
             list($qualifiedName, $publicId, $systemId) = $option['doctype'];
             $writer->writeDTD($qualifiedName, $publicId, $systemId);
         }
-        return new self($writer);
+        $this->xmlWriter = $writer;
     }
 
-    public function __construct($writer)
+    public function xmlElem($name)
     {
-        $this->_writer = $writer;
-    }
-
-    public function _()
-    {
-        $this->_writer->endElement();
+        $this->xmlWriter->startElement($name);
         return $this;
     }
 
-    public function __get($name) {
-        return $this->$name();
+    public function xmlEnd()
+    {
+        $this->xmlWriter->endElement();
+        return $this;
     }
 
-    public function _attr(array $attr=array())
+    public function xmlAttr(array $attr=array())
     {
-        $writer = $this->_writer;
+        $writer = $this->xmlWriter;
         foreach ($attr as $label => $value) {
             $writer->writeAttribute($label, $value);
         }
         return $this;
     }
 
-    public function _cdata($str)
+    public function xmlCdata($str)
     {
-        $this->_writer->writeCData($str);
+        $this->xmlWriter->writeCData($str);
         return $this;
     }
 
-    public function _text($str)
+    public function xmlText($str)
     {
-        $this->_writer->text($str);
+        $this->xmlWriter->text($str);
         return $this;
     }
 
-    public function _comment($str)
+    public function xmlComment($str)
     {
-        $this->_writer->writeComment($str);
+        $this->xmlWriter->writeComment($str);
         return $this;
     }
 
-    public function _pi($target, $data)
+    public function xmlPi($target, $data)
     {
-        $this->_writer->writePI($target, $data);
+        $this->xmlWriter->writePI($target, $data);
         return $this;
     }
 
     public function __toString()
     {
-        return $this->_writer->outputMemory();
-    }
-
-    /**
-     * 引数にthisを渡して処理を中断できるようにする
-     *
-     *
-     */
-    public function _export(&$ref)
-    {
-        $ref = $this;
-        return $this;
-    }
-
-    /**
-     * thisを引数に渡して任意のコールバックを実行する
-     *
-     */
-    public function _do($callback)
-    {
-        if (is_callable($callback)) {
-            call_user_func($callback, $this);
-            return $this;
-        }
-        throw new RuntimeException();
-    }
-
-    public function __call($method, $args)
-    {
-        if ('_' === $method[0]) {
-            throw new RuntimeException('そんなメソッドないよ');
-        }
-
-        $writer = $this->_writer;
-        //単独でappendして終わりの場合
-        if ('_' === $method[strlen($method) - 1]) {
-            $tag = substr($method, 0, -1);
-            $writer->startElement($tag);
-            $this->_modify($args);
-            $writer->endElement();
-
-        //子要素の編集に移る場合
-        } else {
-            $writer->startElement($method);
-            $this->_modify($args);
-        }
-        return $this;
-    }
-
-    protected function _modify(array $args) {
-        $writer = $this->_writer;
-        foreach ($args as $arg) {
-            if (is_array($arg)) {
-                foreach ($arg as $label => $value) {
-                    $writer->writeAttribute($label, $value);
-                }
-            } else {
-                $writer->text($arg);
-            }
-        }
+        return $this->xmlWriter->outputMemory();
     }
 }
