@@ -159,20 +159,21 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
 
     //数値配列かどうか判定する補助メソッド
     // 添字が数値かつ並び順が揃っていたらtrue
+    // 真面目に実装すると判定に時間がかかるため、
+    // 「最初の添え字が0かどうか」で判定する
     private function _isArray($arr) {
         if (!is_array($arr)) return false;
-        //違う場合に即座に返せるようあえてfor文で判定
-        for (reset($arr), $i=0; list($key)=each($arr);) {
-            if ($i++ !== $key) return false;
-        }
-        return true;
+//        for (reset($arr), $i=0; list($key)=each($arr);) {
+//            if ($i++ !== $key) return false;
+//        }
+        $key = key($arr);
+        return ($key === 0);
     }
 
     //配列の末尾のキーを取得
-    private function _lastKey(&$arr) {
+    private function _lastKey($arr) {
         end($arr);
         $lastkey = key($arr);
-        reset($arr);
         return $lastkey;
     }
 
