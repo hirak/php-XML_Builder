@@ -16,6 +16,17 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
 {
     public $xmlArray, $xmlCurrentElem, $xmlParent;
 
+    //高速化のため、タイプ判定をキャッシュして使いまわす。
+    public $_type = self::TYPE_NULL, $_lastKey = null;
+
+    const TYPE_NULL       = 0 //null
+        , TYPE_STRING     = 1 //"str"
+        , TYPE_D_STRING   = 2 //"$":"str"
+        , TYPE_D_ARRAY    = 3 //"$":[]
+        , TYPE_ATTR_ARRAY = 4 //"@attr":"attr",...
+        , TYPE_ARRAY      = 5 //"hoge":"fuga",...
+        ;
+
     public function __construct(&$array, &$elem=null, &$parent=null)
     {
         if ($parent === null) {
@@ -38,14 +49,21 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
     public function xmlAttr(array $attr=array())
     {
         $elem =& $this->xmlCurrentElem;
-        if ($elem === null) {
+        switch ($this->_type) {
+        case self::TYPE_NULL:
             $elem = array();
-        } elseif (is_string($elem)) {
-            $elem = array('$'=>$elem);
+            $this->_type = self::TYPE_ATTR_ARRAY;
+            break;
+        case self::TYPE_STRING:
+            $string = $elem;
+            $elem = array('$'=>$string);
+            $this->_type = self::TYPE_D_STRING;
+            break;
         }
         foreach ($attr as $label => $value) {
             $elem["@$label"] = $value;
         }
+        $this->_lastKey = "@$label";
         return $this;
     }
 
@@ -53,20 +71,34 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
     public function xmlText($str)
     {
         $elem =& $this->xmlCurrentElem;
-        if ($elem === null) {
+        switch ($this->_type) {
+        case self::TYPE_NULL:
             $elem = $str;
-        } elseif (is_string($elem)) {
+            $this->_type = self::TYPE_STRING;
+            break;
+        case self::TYPE_STRING:
             $elem .= $str;
-        } elseif (isset($elem['$'])) {
-            if (is_array($elem['$'])) {
-                $elem['$'][] = $str;
-            } elseif (is_string($elem['$'])) {
-                $elem['$'] .= $str;
-            } else {
-                $elem['$'] = $str;
-            }
-        } elseif (is_array($elem)) {
+            break;
+        case self::TYPE_D_ARRAY:
+            $elem['$'][] = $str;
+            break;
+        case self::TYPE_D_STRING:
+            $elem['$'] .= $str;
+            break;
+        case self::TYPE_ATTR_ARRAY:
             $elem['$'] = $str;
+            $this->_type = self::TYPE_D_STRING;
+            break;
+        case self::TYPE_ARRAY:
+            $elem['$'] = array();
+            foreach ($elem as $key => $val) {
+                if ($key[0] !== '@') {
+                    $elem['$'][] = array($key=>$val);
+                }
+            }
+            $elem['$'][] = $str;
+            $this->_type = self::TYPE_D_ARRAY;
+            break;
         }
         return $this;
     }
@@ -114,67 +146,66 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
         $elem =& $this->xmlCurrentElem;
 
         $newelem = null;
-        //parent: null
-        if ($elem === null) {
-            $elem = array($name=>&$newelem);
 
-        //parent: "string"
-        } elseif (is_string($elem)) {
+        switch ($this->_type) {
+        case self::TYPE_NULL:
+            $elem = array($name => &$newelem);
+            $this->_type = self::TYPE_ARRAY;
+            $this->_lastKey = $name;
+            break;
+        case self::TYPE_STRING:
             $str = $elem;
-            $elem = array('$'=>array($str, array($name=>&$newelem)));
-
-        //parent: [$:[]]
-        } elseif (isset($elem['$']) && is_array($elem['$'])) {
-            $elem['$'][] = array($name=>&$newelem);
-
-        //parent: [hoge: "fuga"] ($nameがまだ存在しないケース
-        } elseif (!array_key_exists($name, $elem)) {
+            $elem = array('$' => array($str, array($name => &$newelem)));
+            $this->_type = self::TYPE_D_ARRAY;
+            $this->_lastKey = '$';
+            break;
+        case self::TYPE_D_STRING:
+            $str = $elem['$'];
+            $elem['$'] = array($str, array($name => &$newelem));
+            $this->_type = self::TYPE_D_ARRAY;
+            $this->_lastKey = '$';
+            break;
+        case self::TYPE_ATTR_ARRAY:
             $elem[$name] =& $newelem;
-
-        //parent: [$name: "hoge"] ($nameが存在し、配列中の末尾であるケース
-        } elseif ($this->_lastKey($elem) === $name) {
-            if ($this->_isArray($elem[$name])) {
-                $elem[$name][] =& $newelem;
-            } else {
-                $old = $elem[$name];
-                $elem[$name] = array($old, &$newelem);
-            }
-
-        //parent: [$name: "hoge", hoge: "fuu"] ($nameは存在するが、配列の末尾でないケース
-        } else {
-            $oldelem = $elem;
-            $elem = array('$'=>array());
-            foreach ($oldelem as $key => $val) {
-                if ($key[0] === '@') {
-                    $elem[$key] = $val;
+            $this->_type = self::TYPE_ARRAY;
+            $this->_lastKey = $name;
+            break;
+        case self::TYPE_ARRAY:
+            if ($name === $this->_lastKey) {
+                if (is_array($elem[$name]) && key($elem[$name]) === 0) { //数値配列とみなす
+                    $elem[$name][] =& $newelem;
                 } else {
-                    $elem['$'][] = array($key => $val);
+                    $original = $elem[$name];
+                    $elem[$name] = array($original, &$newelem);
                 }
+            } elseif (array_key_exists($name, $elem)) {
+                //TYPE_D_ARRAYへ変更する
+                $elem['$'] = array();
+                foreach ($elem as $key => $val) {
+                    if ($key[0] !== '@') {
+                        if (is_array($val) && key($val) === 0) { //hoge:[1,2,3]は展開する
+                            foreach ($val as $v) {
+                                $elem['$'][] = array($key => $v);
+                            }
+                        } else {
+                            $elem['$'][] = $val;
+                        }
+                        unset($elem[$key]);
+                    }
+                }
+                $this->_type = self::TYPE_D_ARRAY;
+                $this->_lastKey = '$';
+            } else {
+                $elem[$name] =& $newelem;
+                $this->_lastKey = $name;
             }
+            break;
+        case self::TYPE_D_ARRAY:
             $elem['$'][] = array($name => &$newelem);
+            break;
         }
 
         return new self($dom, $newelem, $this);
-    }
-
-    //数値配列かどうか判定する補助メソッド
-    // 添字が数値かつ並び順が揃っていたらtrue
-    // 真面目に実装すると判定に時間がかかるため、
-    // 「最初の添え字が0かどうか」で判定する
-    private function _isArray($arr) {
-        if (!is_array($arr)) return false;
-//        for (reset($arr), $i=0; list($key)=each($arr);) {
-//            if ($i++ !== $key) return false;
-//        }
-        $key = key($arr);
-        return ($key === 0);
-    }
-
-    //配列の末尾のキーを取得
-    private function _lastKey($arr) {
-        end($arr);
-        $lastkey = key($arr);
-        return $lastkey;
     }
 
     //for PHP5.4(json_encode)

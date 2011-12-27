@@ -15,7 +15,7 @@ class XML_BuilderTest extends PHPUnit_Framework_TestCase
      * 全テストケースを起動
      *
      */
-    function testAll() {
+    function testDOM() {
         $dir = dirname(__FILE__);
         $tests = glob($dir . '/test*.php');
         $xmls = glob($dir . '/test*.xml');
@@ -28,6 +28,13 @@ class XML_BuilderTest extends PHPUnit_Framework_TestCase
             $php = (string)$php;
             $this->assertXmlStringEqualsXmlFile($xmls[$i], $php, $tests[$i]);
         }
+    }
+
+    function testXMLWriter() {
+        $dir = dirname(__FILE__);
+        $tests = glob($dir . '/test*.php');
+        $xmls = glob($dir . '/test*.xml');
+        $length = min(count($tests), count($xmls));
 
         for ($i=0; $i<$length; $i++) {
             $builder = XML_Builder::factory(array('class'=>'xmlwriter'));
@@ -36,7 +43,11 @@ class XML_BuilderTest extends PHPUnit_Framework_TestCase
             $php = (string)$php;
             $this->assertXmlStringEqualsXmlFile($xmls[$i], $php, $tests[$i]);
         }
+    }
 
+    function testArray() {
+        $dir = dirname(__FILE__);
+        $tests = glob($dir . '/test*.php');
         $arrays = glob($dir . '/test*.php.array');
         $length = min(count($tests), count($arrays));
 
