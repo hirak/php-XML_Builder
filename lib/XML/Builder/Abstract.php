@@ -52,7 +52,7 @@ abstract class XML_Builder_Abstract implements XML_Builder_Interface
     final function xmlDo($callback)
     {
         if (!is_callable($callback)) {
-            throw new RuntimeException('bad callback');
+            throw new InvalidArgumentException('bad callback');
         }
         call_user_func($callback, $this);
         return $this;

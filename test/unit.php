@@ -11,10 +11,6 @@ error_reporting(E_ALL|E_STRICT);
 require_once dirname(__FILE__) . '/../lib/XML/Builder.php';
 class XML_BuilderTest extends PHPUnit_Framework_TestCase
 {
-    /**
-     * 全テストケースを起動
-     *
-     */
     function testDOM() {
         $dir = dirname(__FILE__);
         $tests = glob($dir . '/test*.php');
@@ -45,6 +41,10 @@ class XML_BuilderTest extends PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * test*.phpとtest*.php.arrayの比較を行います。
+     *
+     */
     function testArray() {
         $dir = dirname(__FILE__);
         $tests = glob($dir . '/test*.php');
@@ -60,4 +60,101 @@ class XML_BuilderTest extends PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * DTDのテスト
+     *
+     */
+    function testDtd() {
+        $expect =<<<_XML_
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HTML>
+<html/>
+_XML_;
+        $builder = XML_Builder::factory(array('doctype'=>XML_Builder::$HTML5, 'formatOutput'=>false));
+        $builder->html_();
+        $generated = $builder->__toString();
+        $this->assertXmlStringEqualsXmlString($expect, $generated);
+
+        $builder = XML_Builder::factory(array('class'=>'xmlwriter','doctype'=>XML_Builder::$HTML5, 'formatOutput'=>false));
+        $builder->html_();
+        $generated = $builder->__toString();
+        $this->assertXmlStringEqualsXmlString($expect, $generated);
+    }
+
+    /**
+     * 制御構文のテスト
+     *
+     */
+    function testControlStructures() {
+        XML_Builder::factory()
+            ->root
+                ->xmlPause($b);
+                $b
+                ->xmlDo(array($this, 'addElem'))
+                ->xmlDo(array($this, 'addElem'))
+                ->xmlExport($builder);
+
+        XML_Builder::factory()
+            ->root
+                ->elem_('hoge')
+                ->elem_('hoge')
+                ->xmlPause($builder2);
+
+        $this->assertEqualXMLStructure($builder2->xmlCurrentElem, $builder->xmlCurrentElem);
+
+    }
+    function addElem($builder) {
+        $builder->elem_('hoge');
+    }
+
+    /**
+     * DOM固有のテスト
+     * HTML出力モードについて
+     *
+     */
+    function testDOMRenderingHTML() {
+        XML_Builder::factory(array('doctype'=>XML_Builder::$HTML5))
+            ->html
+                ->head
+                    ->meta_(array('http-equiv'=>'Content-Type','content'=>'text/html; charset=UTF-8'))
+                    ->title_('HTML出力テスト')
+                ->_
+                ->body
+                    ->div(array('id'=>'wrapper'))
+                        ->h1_('HTML出力テスト')
+                    ->_
+                ->_
+            ->_
+        ->xmlPause($builder);
+
+        ob_start();
+        $builder->xmlEcho('html');
+        $html = ob_get_clean();
+
+        $this->assertStringEqualsFile(
+            dirname(__FILE__).'/expect.html',
+            $html
+        );
+
+    }
+
+    /**
+     * XMLWriter固有のテスト
+     * ファイルに直接出力するモードについて
+     *
+     */
+    function testXMLWriterWriteTo() {
+        XML_Builder::factory(array('class'=>'xmlwriter','writeto'=>'writeto.xml'))
+            ->root_;
+
+        $this->assertXmlFileEqualsXmlFile('test001.xml', 'writeto.xml');
+    }
+
+    /**
+     * doに実行できないものを渡し、例外を発生させる
+     * @expectedException InvalidArgumentException
+     */
+    function testException() {
+        XML_Builder::factory()->xmlDo(array($this,'use800'));
+    }
 }

@@ -14,13 +14,8 @@ class XML_Builder_XMLWriter extends XML_Builder_Abstract
     /**
      * @param writeto 書き込み先を指定
      */
-    public function __construct($writer)
+    public function __construct(array $writer)
     {
-        if ($writer instanceof XMLWriter) {
-            $this->xmlWriter = $writer;
-            return;
-        }
-
         $option = $writer;
         $writer = new XMLWriter;
         if (isset($option['writeto']) && $option['writeto']!=='memory') {

@@ -18,7 +18,7 @@ abstract class XML_Builder
         $HTML4_STRICT = array('HTML', '-//W3C//DTD HTML 4.01//EN', 'http://www.w3.org/TR/html4/strict.dtd')
       , $HTML4_TRANSITIONAL = array('HTML', '-//W3C//DTD HTML 4.01 Transitional//EN', 'http://www.w3.org/TR/html4/loose.dtd')
       , $HTML4_FRAMESET = array('HTML', '-//W3C//DTD HTML 4.01 Frameset//EN', 'http://www.w3.org/TR/html4/frameset.dtd')
-      , $HTML5 = array('HTML', '', '')
+      , $HTML5 = array('HTML', null, null)
       , $XHTML1_STRICT = array('XHTML', '-//W3C//DTD XHTML 1.0 Strict//EN', 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd')
       , $XHTML1_TRANSITIONAL = array('XHTML', '-//W3C//DTD XHTML 1.0 Transitional//EN', 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd')
       , $XHTML1_FRAMESET = array('XHTML', '-//W3C//DTD XHTML 1.0 Frameset//EN', 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd')
@@ -42,7 +42,7 @@ abstract class XML_Builder
             'encoding' => 'UTF-8',
             'formatOutput' => true,
             'doctype' => null,
-            'class' => 'XML_Builder_DOM',
+            'class' => 'XML_Builder_DOM'
         );
 
         $classmap = array(
