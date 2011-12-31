@@ -151,6 +151,36 @@ _XML_;
     }
 
     /**
+     * Array固有のテスト
+     * json系
+     */
+    function testArrayToJson() {
+        XML_Builder::factory(array('class'=>'array'))
+            ->root_('hoge')
+        ->xmlPause($builder);
+
+        $this->assertEquals($builder->xmlArray, $builder->jsonSerialize());
+        $this->assertEquals('{"root":"hoge"}', $builder->toJSON());
+
+    }
+
+    /**
+     * Array固有のテスト
+     * echo系
+     */
+    function testArrayEcho() {
+        XML_Builder::factory(array('class'=>'array'))
+            ->root_('hoge')
+        ->xmlPause($builder);
+
+        ob_start();
+        $builder->_echo();
+        $res = ob_get_clean();
+
+        $this->assertEquals((string)$builder, $res);
+    }
+
+    /**
      * doに実行できないものを渡し、例外を発生させる
      * @expectedException InvalidArgumentException
      */
