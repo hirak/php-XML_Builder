@@ -90,13 +90,15 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
             $this->_type = self::TYPE_D_STRING;
             break;
         case self::TYPE_ARRAY:
-            $elem['$'] = array();
+            $darray = array();
             foreach ($elem as $key => $val) {
                 if ($key[0] !== '@') {
-                    $elem['$'][] = array($key=>$val);
+                    $darray[] = array($key=>$val);
+                    unset($elem[$key]);
                 }
             }
-            $elem['$'][] = $str;
+            $darray[] = $str;
+            $elem['$'] = $darray;
             $this->_type = self::TYPE_D_ARRAY;
             break;
         }
@@ -180,19 +182,21 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
                 }
             } elseif (array_key_exists($name, $elem)) {
                 //TYPE_D_ARRAYへ変更する
-                $elem['$'] = array();
+                $darray = array();
                 foreach ($elem as $key => $val) {
                     if ($key[0] !== '@') {
                         if (is_array($val) && key($val) === 0) { //hoge:[1,2,3]は展開する
                             foreach ($val as $v) {
-                                $elem['$'][] = array($key => $v);
+                                $darray[] = array($key => $v);
                             }
                         } else {
-                            $elem['$'][] = $val;
+                            $darray[] = array($key=>$val);
                         }
                         unset($elem[$key]);
                     }
                 }
+                $darray[] = array($name => &$newelem);
+                $elem['$'] = $darray;
                 $this->_type = self::TYPE_D_ARRAY;
                 $this->_lastKey = '$';
             } else {

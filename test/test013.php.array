@@ -1,0 +1,73 @@
+<?php
+/**
+ *
+ */
+return array(
+    'root' => array(
+        'moge' => array(
+            '$' => 'strstr',
+            '@attr' => 'attr'
+        ),
+        'moge1' => 'strstr',
+
+        'moge2' => array(
+            '$' => array(
+                'str',
+                array('mogeChild'=>'abc'),
+                'str',
+            ),
+        ),
+
+        'moge3' => array(
+            '$' => array(
+                array('mogeChild1'=>null),
+                array('mogeChild2'=>null),
+                'str'
+            ),
+        ),
+
+        'moge4' => array(
+            '@attr' => 'attr',
+            '$' => array(
+                'str',
+                array('mogeChild1'=>null),
+            ),
+        ),
+
+        'moge5' => array(
+            '@attr' => 'attr',
+            'mogeChild1' => null,
+        ),
+
+        'moge6' => array(
+            'mogeChild1' => array('a','b','c'),
+        ),
+
+        'moge7' => array(
+            '$' => array(
+                array('abc'=>null),
+                array('bcd'=>null),
+                array('abc'=>null),
+            ),
+        ),
+
+        'moge8' => array(
+            '$' => array(
+                array('abc'=>null),
+                array('abc'=>null),
+                array('bcd'=>null),
+                array('abc'=>null),
+            ),
+        ),
+
+        'moge9' => array(
+            '$' => array(
+                array('abc'=>null),
+                array('bcd'=>null),
+                array('abc'=>null),
+                array('abc'=>null),
+            ),
+        ),
+
+    ),
+);
