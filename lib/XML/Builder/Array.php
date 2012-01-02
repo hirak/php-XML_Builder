@@ -1,23 +1,54 @@
 <?php
 /**
- * XML_Builderと見せかけてPHPの配列を作るだけのクラス。
- * 同じインターフェースで出力を差し替えたい場合にどうぞ。
+ * XML_Builder_Array
  *
+ * XML_Builderの具象クラス・配列版
  *
+ * PHP versions 5
+ *
+ * LICENSE: MIT License
+ *
+ * @category  XML
+ * @package   XML_Builder
+ * @author    Hiraku NAKANO <hiraku@tojiru.net>
+ * @copyright 2012 Hiraku NAKANO
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @link      http://openpear.org/packages/XML_Builder
  */
-if (!class_exists('XML_Builder_Abstract',false)) require_once dirname(__FILE__).'/Abstract.php';
+
+if (!class_exists('XML_Builder_Abstract', false)) {
+    require_once dirname(__FILE__).'/Abstract.php';
+}
 //for version < PHP5.4
-if (!interface_exists('JsonSerializable',false)) {
-    interface JsonSerializable {
+if (!interface_exists('JsonSerializable', false)) {
+    /*
+     * PHP5.4に付属しているjson_encode用のインターフェース
+     */
+    interface JsonSerializable
+    {
         function jsonSerialize();
     }
 }
+
+/**
+ * XML_Builder_Array
+ *
+ * XML_Builderと見せかけてPHPの配列を作るだけのクラス。
+ * 同じインターフェースで出力を差し替えたい場合にどうぞ。
+ *
+ * @category  XML
+ * @package   XML_Builder
+ * @author    Hiraku NAKANO <hiraku@tojiru.net>
+ * @copyright 2012 Hiraku NAKANO
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @link      http://openpear.org/packages/XML_Builder
+ */
 class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
 {
     public $xmlArray, $xmlCurrentElem, $xmlParent;
 
     //高速化のため、タイプ判定をキャッシュして使いまわす。
-    public $_type = self::TYPE_NULL, $_lastKey = null;
+    private $_type = self::TYPE_NULL, $_lastKey = null;
 
     const TYPE_NULL       = 0 //null
         , TYPE_STRING     = 1 //"str"
@@ -27,7 +58,16 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
         , TYPE_ARRAY      = 5 //"hoge":"fuga",...
         ;
 
-    public function __construct(&$array, &$elem=null, &$parent=null)
+    /**
+     * constructor
+     *
+     * @param array $array オプションもしくは大元の配列
+     * @param mixed $elem  現在編集中の配列
+     * @param mixed $parent 現在編集中の配列
+     *
+     * @return null
+     */
+    function __construct(&$array, &$elem=null, &$parent=null)
     {
         if ($parent === null) {
             $newelem = null;
@@ -40,13 +80,24 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
         $this->xmlParent =& $parent;
     }
 
-    public function xmlEnd()
+    /**
+     * 現在の文脈を終了して親の編集に戻る
+     *
+     * @return XML_Builder_Array
+     */
+    function xmlEnd()
     {
         return $this->xmlParent;
     }
 
-    //属性を追加
-    public function xmlAttr(array $attr=array())
+    /**
+     * 属性を追加
+     *
+     * @param array $attr 属性名=>値 の配列
+     *
+     * @return XML_Builder_Array
+     */
+    function xmlAttr(array $attr=array())
     {
         $elem =& $this->xmlCurrentElem;
         switch ($this->_type) {
@@ -67,8 +118,14 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
         return $this;
     }
 
-    //テキストノードの追加
-    public function xmlText($str)
+    /**
+     * テキストノードの追加
+     *
+     * @param string $str 追加したい文字列
+     *
+     * @return XML_Builder_Array
+     */
+    function xmlText($str)
     {
         $elem =& $this->xmlCurrentElem;
         switch ($this->_type) {
@@ -105,44 +162,54 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
         return $this;
     }
 
-    //テキストノードの追加と同義
-    public function xmlCdata($str)
+    /**
+     * テキストノードの追加と同義
+     */
+    function xmlCdata($str)
     {
         $this->xmlText($str);
         return $this;
     }
 
-    //無視
-    public function xmlComment($str)
+    /**
+     * ignored
+     *
+     * @return $this
+     */
+    function xmlComment($str)
     {
         return $this;
     }
 
-    //無視
-    public function xmlPi($target, $data)
+    /**
+     * ignored
+     *
+     * @return $this
+     */
+    function xmlPi($target, $data)
     {
         return $this;
     }
 
-    public function __toString()
+    function __toString()
     {
         return $this->xmlRender();
     }
 
-    public function xmlRender()
+    function xmlRender()
     {
         ob_start();
         var_dump($this->xmlArray);
         return ob_get_clean();
     }
 
-    public function xmlEcho()
+    function xmlEcho()
     {
         var_dump($this->xmlArray);
         return $this;
     }
 
-    public function xmlElem($name)
+    function xmlElem($name)
     {
         $dom =& $this->xmlArray;
         $elem =& $this->xmlCurrentElem;
@@ -174,7 +241,8 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
             break;
         case self::TYPE_ARRAY:
             if ($name === $this->_lastKey) {
-                if (is_array($elem[$name]) && key($elem[$name]) === 0) { //数値配列とみなす
+                //数値配列とみなす
+                if (is_array($elem[$name]) && key($elem[$name]) === 0) {
                     $elem[$name][] =& $newelem;
                 } else {
                     $original = $elem[$name];
@@ -185,7 +253,8 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
                 $darray = array();
                 foreach ($elem as $key => $val) {
                     if ($key[0] !== '@') {
-                        if (is_array($val) && key($val) === 0) { //hoge:[1,2,3]は展開する
+                        //hoge:[1,2,3]は展開する
+                        if (is_array($val) && key($val) === 0) {
                             foreach ($val as $v) {
                                 $darray[] = array($key => $v);
                             }
@@ -212,13 +281,23 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
         return new self($dom, $newelem, $this);
     }
 
-    //for PHP5.4(json_encode)
-    public function jsonSerialize() {
+    /**
+     * for PHP5.4(json_encode)
+     *
+     * @return array
+     */
+    function jsonSerialize()
+    {
         return $this->xmlArray;
     }
 
-    //for Zend_Json
-    public function toJson() {
+    /**
+     * for Zend_Json
+     *
+     * @return string JSON
+     */
+    function toJson()
+    {
         return json_encode($this->xmlArray);
     }
 }

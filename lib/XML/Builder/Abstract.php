@@ -1,9 +1,36 @@
 <?php
 /**
+ * XML_Builder
  *
+ * utility & constants class
  *
+ * PHP versions 5
+ *
+ * LICENSE: MIT License
+ *
+ * @category  XML
+ * @package   XML_Builder
+ * @author    Hiraku NAKANO <hiraku@tojiru.net>
+ * @copyright 2012 Hiraku NAKANO
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @link      http://openpear.org/packages/XML_Builder
  */
-if (!class_exists('XML_Builder_Interface',false)) require_once dirname(__FILE__).'/Interface.php';
+if (!class_exists('XML_Builder_Interface', false)) {
+    require_once dirname(__FILE__).'/Interface.php';
+}
+
+/**
+ * XML_Builder_Abstract
+ *
+ * abstract class
+ *
+ * @category  XML
+ * @package   XML_Builder
+ * @author    Hiraku NAKANO <hiraku@tojiru.net>
+ * @copyright 2012 Hiraku NAKANO
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @link      http://openpear.org/packages/XML_Builder
+ */
 abstract class XML_Builder_Abstract implements XML_Builder_Interface
 {
     final function __get($name)
@@ -26,10 +53,10 @@ abstract class XML_Builder_Abstract implements XML_Builder_Interface
             return call_user_func_array(array($this, $methodName), $args);
         }
 
-        $immediately = false;
+        $immediately = false; // flag switch
         $postfix = substr($method, strlen($method) - $sigilLength);
         if ($postfix === $sigil) {
-            $immediately = true; //即座にエレメントを閉じて返却するフラグon
+            $immediately = true;
             $method = substr($method, 0, -$sigilLength);
         }
 

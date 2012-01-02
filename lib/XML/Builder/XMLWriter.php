@@ -1,12 +1,37 @@
 <?php
 /**
- * XMLWriter版
- * メモリの消費が少なく、出力先に直接流すことができるが、機能がDOMより制限される
+ * XML_Builder
  *
+ * XML_Builder_XMLWriter class file
  *
+ * PHP versions 5
+ *
+ * LICENSE: MIT License
+ *
+ * @category  XML
+ * @package   XML_Builder
+ * @author    Hiraku NAKANO <hiraku@tojiru.net>
+ * @copyright 2012 Hiraku NAKANO
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @link      http://openpear.org/packages/XML_Builder
  */
 
-if (!class_exists('XML_Builder_Abstract',false)) require_once dirname(__FILE__).'/Abstract.php';
+if (!class_exists('XML_Builder_Abstract', false)) {
+    require_once dirname(__FILE__).'/Abstract.php';
+}
+
+/**
+ * XML_Builder_XMLWriter
+ *
+ * XMLWriterのWrapper. DOMよりメモリの消費量が少ない。
+ *
+ * @category  XML
+ * @package   XML_Builder
+ * @author    Hiraku NAKANO <hiraku@tojiru.net>
+ * @copyright 2012 Hiraku NAKANO
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @link      http://openpear.org/packages/XML_Builder
+ */
 class XML_Builder_XMLWriter extends XML_Builder_Abstract
 {
     public $xmlWriter;
@@ -14,7 +39,7 @@ class XML_Builder_XMLWriter extends XML_Builder_Abstract
     /**
      * @param writeto 書き込み先を指定
      */
-    public function __construct(array $writer)
+    function __construct(array $writer)
     {
         $option = $writer;
         $writer = new XMLWriter;
@@ -35,19 +60,19 @@ class XML_Builder_XMLWriter extends XML_Builder_Abstract
         $this->xmlWriter = $writer;
     }
 
-    public function xmlElem($name)
+    function xmlElem($name)
     {
         $this->xmlWriter->startElement($name);
         return $this;
     }
 
-    public function xmlEnd()
+    function xmlEnd()
     {
         $this->xmlWriter->endElement();
         return $this;
     }
 
-    public function xmlAttr(array $attr=array())
+    function xmlAttr(array $attr=array())
     {
         $writer = $this->xmlWriter;
         foreach ($attr as $label => $value) {
@@ -56,31 +81,31 @@ class XML_Builder_XMLWriter extends XML_Builder_Abstract
         return $this;
     }
 
-    public function xmlCdata($str)
+    function xmlCdata($str)
     {
         $this->xmlWriter->writeCData($str);
         return $this;
     }
 
-    public function xmlText($str)
+    function xmlText($str)
     {
         $this->xmlWriter->text($str);
         return $this;
     }
 
-    public function xmlComment($str)
+    function xmlComment($str)
     {
         $this->xmlWriter->writeComment($str);
         return $this;
     }
 
-    public function xmlPi($target, $data)
+    function xmlPi($target, $data)
     {
         $this->xmlWriter->writePI($target, $data);
         return $this;
     }
 
-    public function __toString()
+    function __toString()
     {
         return $this->xmlWriter->outputMemory();
     }
