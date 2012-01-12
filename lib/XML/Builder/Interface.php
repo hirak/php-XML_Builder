@@ -34,7 +34,7 @@ interface XML_Builder_Interface
 
     function xmlEnd();
 
-    function xmlAttr(array $arr);
+    function xmlAttr(array $attr=array());
 
     function xmlText($str);
 
