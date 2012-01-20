@@ -35,6 +35,7 @@ if (!class_exists('XML_Builder_Abstract', false)) {
 class XML_Builder_XMLWriter extends XML_Builder_Abstract
 {
     public $xmlWriter;
+    protected $_writeToMemory = false;
 
     /**
      * @param writeto 書き込み先を指定
@@ -47,6 +48,7 @@ class XML_Builder_XMLWriter extends XML_Builder_Abstract
             $writer->openURI($option['writeto']);
         } else {
             $writer->openMemory();
+            $this->_writeToMemory = true;
         }
         if ($option['formatOutput']) {
             $writer->setIndentString('  ');
@@ -107,6 +109,15 @@ class XML_Builder_XMLWriter extends XML_Builder_Abstract
 
     function __toString()
     {
-        return $this->xmlWriter->outputMemory();
+        if ($this->_writeToMemory) {
+            return $this->xmlWriter->outputMemory();
+        } else {
+            return '';
+        }
+    }
+
+    function xmlEcho()
+    {
+        echo $this;
     }
 }
