@@ -49,6 +49,7 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
 
     //高速化のため、タイプ判定をキャッシュして使いまわす。
     private $_type = self::TYPE_NULL, $_lastKey = null;
+    private $_serializer;
 
     const TYPE_NULL       = 0 //null
         , TYPE_STRING     = 1 //"str"
@@ -70,6 +71,10 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
     function __construct(&$array, &$elem=null, &$parent=null)
     {
         if ($parent === null) {
+            //初期
+            if (!empty($array['serializer'])) {
+                $this->_serializer = $array['serializer'];
+            }
             $newelem = null;
             $this->xmlArray =& $newelem;
             $this->xmlCurrentElem =& $newelem;
@@ -201,14 +206,27 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
 
     function xmlRender()
     {
-        ob_start();
-        var_dump($this->xmlArray);
-        return ob_get_clean();
+        if (empty($this->_serializer)) {
+            return var_export($this->xmlArray, true);
+        } else {
+            if (is_callable($this->_serializer)) {
+                return call_user_func($this->_serializer, $this->xmlArray);
+            } else {
+                $args = $this->_serializer;
+                $callback = $args[0];
+                $args[0] = $this->xmlArray;
+                if (is_callable($callback)) {
+                    return call_user_func_array($callback, $args);
+                } else {
+                    throw new InvalidArgumentException('invalid serializer');
+                }
+            }
+        }
     }
 
     function xmlEcho()
     {
-        var_dump($this->xmlArray);
+        echo $this->xmlRender();
         return $this;
     }
 
