@@ -1,7 +1,8 @@
 XML_Builder
 ======================================================
 
-XMLの生成コードを短く書くためのライブラリです。まだ開発中なのでバグがたくさんあるかも。
+XMLの生成コードを短く書くためのライブラリです。
+http://hirak.github.com/xmlbuilder/
 
 例
 ------------------------------------------------------
@@ -10,7 +11,7 @@ XMLの生成コードを短く書くためのライブラリです。まだ開�
 
 ```php
 <?php
-require_once 'path/to/XML/Builder.php';
+require_once 'XML/Builder.php';
 
 XML_Builder::factory(array('doctype'=>XML_Builder::$XHTML11))
 ->html(array('xmlns'=>XML_Builder::NS_XHTML))
@@ -36,6 +37,9 @@ XML_Builder::factory(array('doctype'=>XML_Builder::$XHTML11))
 * 独自のDSL ・・・XMLを文字列で書くより短く書けます。
 * 安心 ・・・DOMやXMLWriterのWrapperに徹しており、これらをきちんと使うことで安全なXMLを生成できます。
 * 配列とDOMの相互変換機能・・・実装予定
+
+詳細はドキュメントを参照
+http://hirak.github.com/xmlbuilder/
 
 
 LISENCE
