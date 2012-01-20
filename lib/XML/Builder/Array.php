@@ -99,6 +99,9 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
      */
     function xmlAttr(array $attr=array())
     {
+        if (empty($attr)) {
+            return $this;
+        }
         $elem =& $this->xmlCurrentElem;
         switch ($this->_type) {
         case self::TYPE_NULL:
