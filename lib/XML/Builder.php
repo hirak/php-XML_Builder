@@ -125,4 +125,111 @@ abstract class XML_Builder
         $class = $option['class'];
         return new $class($option);
     }
+
+    /**
+     * convert "XML string" to Array
+     *
+     */
+    static function xmlToArray($xmlString, $class='XML_Builder_Array') {
+        $builder = self::factory(array('class'=>$class));
+        $cursor = new XMLReader;
+        $cursor->XML($xmlString, null, LIBXML_NOBLANKS);
+
+        while ($cursor->read()) {
+            switch ($cursor->nodeType) {
+                case XMLReader::ELEMENT:
+                    $builder = $builder->xmlElem($cursor->name);
+                    if ($cursor->hasAttributes) {
+                        $attr = array();
+                        $cursor->moveToFirstAttribute();
+                        do {
+                            $attr[$cursor->name] = $cursor->value;
+                        } while($cursor->moveToNextAttribute());
+                        $builder->xmlAttr($attr);
+                        $cursor->moveToElement();
+                    }
+                    if ($cursor->isEmptyElement) {
+                        $builder = $builder->xmlEnd();
+                    }
+                    break;
+                case XMLReader::END_ELEMENT:
+                    $builder = $builder->xmlEnd();
+                    break;
+                case XMLReader::TEXT:
+                case XMLReader::CDATA:
+                    $builder->xmlText($cursor->value);
+                    break;
+            }
+        }
+
+        return $builder->xmlArray;
+    }
+
+    /**
+     * convert "DOMDocument" to Array
+     *
+     */
+    static function domToArray(DOMNode $node, $builder='array') {
+        static $nsList=array();
+
+        if ($node instanceof DOMDocument) {
+            $xpath = new DOMXPath($node);
+            $namespaces = $xpath->query('namespace::*');
+            $nsList = array();
+            foreach ($namespaces as $n) {
+                $nsList[] = $n->nodeName;
+            }
+
+            if (empty($builder)) {
+                $builder = self::factory(array('class'=>'array'));
+            } elseif (is_string($builder)) {
+                $builder = self::factory(array('class'=>$builder));
+            }
+
+            $result = domToArray($node->documentElement, $builder);
+            return $result->xmlArray;
+        }
+
+        $b = $builder->xmlElem($node->nodeName);
+
+        $array = array();
+        //名前空間を復元
+        foreach ($nsList as $ns) {
+            $xmlns = $node->getAttribute($ns);
+            if ('' !== $xmlns) {
+                $array[$ns] = $xmlns;
+            }
+        }
+        //属性がある場合
+        if ($node->hasAttributes()) {
+            $attr = $node->attributes;
+            for ($i=0, $len=$attr->length; $i<$len; $i++) {
+                $currentAttr = $attr->item($i);
+                $array[$currentAttr->nodeName] = $currentAttr->nodeValue;
+            }
+        }
+        if (!empty($array)) {
+            $b->xmlAttr($array);
+        }
+
+        if ($node->hasChildNodes()) {
+            foreach ($node->childNodes as $cn) {
+                switch ($cn->nodeType) {
+                    case XML_TEXT_NODE:
+                        $b->xmlText($cn->nodeValue);
+                        break;
+                    case XML_CDATA_SECTION_NODE:
+                        $b->xmlCdata($cn->nodeValue);
+                        break;
+                    case XML_COMMENT_NODE:
+                        $b->xmlComment($cn->data);
+                        break;
+                    case XML_ELEMENT_NODE:
+                        $b = domToArray($cn, $b);
+                }
+            }
+        }
+
+        return $b->xmlEnd();
+    }
 }
