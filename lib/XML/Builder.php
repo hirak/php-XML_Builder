@@ -89,8 +89,8 @@ abstract class XML_Builder
         NS_XHTML = 'http://www.w3.org/1999/xhtml'
       , NS_ATOM = 'http://www.w3.org/2005/Atom'
       , NS_ATOM_PUB = 'http://www.w3.org/2007/app'
-      , NS_ATOM_THREAD = 'http://purl.org/syndication/thread/1.0',
-      , NS_ATOM_HISTORY = 'http://purl.org/syndication/history/1.0',
+      , NS_ATOM_THREAD = 'http://purl.org/syndication/thread/1.0'
+      , NS_ATOM_HISTORY = 'http://purl.org/syndication/history/1.0'
       , NS_OPENSEARCH = 'http://a9.com/-/spec/opensearch/1.1/'
       , NS_GDATA = 'http://schemas.google.com/g/2005'
       , NS_RSS_10 = 'http://purl.org/rss/1.0/'
@@ -188,7 +188,7 @@ abstract class XML_Builder
                 $builder = self::factory(array('class'=>$builder));
             }
 
-            $result = domToArray($node->documentElement, $builder);
+            $result = self::domToArray($node->documentElement, $builder);
             return $result->xmlArray;
         }
 
@@ -227,7 +227,7 @@ abstract class XML_Builder
                         $b->xmlComment($cn->data);
                         break;
                     case XML_ELEMENT_NODE:
-                        $b = domToArray($cn, $b);
+                        $b = self::domToArray($cn, $b);
                 }
             }
         }
