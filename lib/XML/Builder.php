@@ -49,38 +49,38 @@ abstract class XML_Builder
     static $sigil = '_';
 
     static $HTML4_STRICT = array(
-        'HTML',
+        'html',
         '-//W3C//DTD HTML 4.01//EN',
         'http://www.w3.org/TR/html4/strict.dtd',
     );
     static $HTML4_TRANSITIONAL = array(
-        'HTML',
+        'html',
         '-//W3C//DTD HTML 4.01 Transitional//EN',
         'http://www.w3.org/TR/html4/loose.dtd',
     );
     static $HTML4_FRAMESET = array(
-        'HTML',
+        'html',
         '-//W3C//DTD HTML 4.01 Frameset//EN',
         'http://www.w3.org/TR/html4/frameset.dtd',
     );
-    static $HTML5 = array('HTML', null, null);
+    static $HTML5 = array('html', null, null);
     static $XHTML1_STRICT = array(
-        'XHTML',
+        'html',
         '-//W3C//DTD XHTML 1.0 Strict//EN',
         'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd',
     );
     static $XHTML1_TRANSITIONAL = array(
-        'XHTML',
+        'html',
         '-//W3C//DTD XHTML 1.0 Transitional//EN',
         'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd',
     );
     static $XHTML1_FRAMESET = array(
-        'XHTML',
+        'html',
         '-//W3C//DTD XHTML 1.0 Frameset//EN',
         'http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd'
     );
     static $XHTML11 = array(
-        'XHTML',
+        'html',
         '-//W3C//DTD XHTML 1.1//EN',
         'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd'
     );
