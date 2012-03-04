@@ -234,4 +234,28 @@ abstract class XML_Builder
 
         return $b->xmlEnd();
     }
+
+    //translator for xml
+    static function toXsdType($data)
+    {
+        if (is_bool($data)) {
+            return $data ? 'true' : 'false';
+        } elseif ($data instanceof DateTime) {
+            return $data->format('c');
+        } else {
+            return $data;
+        }
+    }
+
+    //translator for json
+    static function toJsonType($data)
+    {
+        if ($data instanceof DateTime) {
+            return $data->format('c');
+        } elseif (method_exists($data, '__toString')) {
+            return (string)$data;
+        } else {
+            return $data;
+        }
+    }
 }
