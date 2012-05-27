@@ -258,4 +258,24 @@ abstract class XML_Builder
             return $data;
         }
     }
+
+    //without root node
+    static function json($data) {
+        return json_encode(current($data));
+    }
+
+    //without root node && prettyprint
+    static function jsonDebug($data) {
+        return json_encode(current($data), 448);
+    }
+
+    //without root
+    static function serialize($data) {
+        return serialize(current($data));
+    }
+
+    //without root
+    static function yaml($data) {
+        return yaml_emit(current($data));
+    }
 }
