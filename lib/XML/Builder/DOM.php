@@ -117,6 +117,14 @@ class XML_Builder_DOM extends XML_Builder_Abstract
         return $this;
     }
 
+    function xmlRaw($xml)
+    {
+        $df = $this->xmlDom->createDocumentFragment();
+        $df->appendXML($xml);
+        $this->xmlCurrentElem->appendChild($df);
+        return $this;
+    }
+
     function xmlRender($format='xml')
     {
         if ($format === 'html') {

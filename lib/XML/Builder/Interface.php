@@ -49,4 +49,8 @@ interface XML_Builder_Interface
     function xmlExport(&$out);
 
     function xmlPause(&$out);
+
+    function xmlMarkArray($name);
+
+    function xmlRaw($xml);
 }

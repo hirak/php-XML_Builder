@@ -230,6 +230,48 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
         return $this;
     }
 
+    /**
+     * この後配列を作る
+     */
+    function xmlMarkArray($name)
+    {
+        $dom =& $this->xmlArray;
+        $elem =& $this->xmlCurrentElem;
+
+        switch ($this->_type) {
+        case self::TYPE_NULL:
+            $elem = array($name => array());
+            $this->_type = self::TYPE_ARRAY;
+            $this->_lastKey = $name;
+            break;
+        case self::TYPE_ATTR_ARRAY:
+            $elem[$name] = array();
+            $this->_type = self::TYPE_ARRAY;
+            $this->_lastKey = $name;
+            break;
+        case self::TYPE_ARRAY:
+            if ($name === $this->_lastKey) {
+                //数値配列とみなす
+                if (is_array($elem[$name]) && (count($elem[$name]) === 0 || key($elem[$name]) === 0)) {
+                    //何もしない
+                } else {
+                    $original = $elem[$name];
+                    $elem[$name] = array($original, &$newelem);
+                }
+            } elseif (array_key_exists($name, $elem)) {
+                throw new InvalidArgumentException('xmlMarkArray()');
+            } else {
+                $elem[$name] = array();
+                $this->_lastKey = $name;
+            }
+            break;
+        default:
+            throw new InvalidArgumentException('xmlMarkArray()');
+        }
+
+        return $this;
+    }
+
     function xmlElem($name)
     {
         $dom =& $this->xmlArray;
@@ -263,7 +305,7 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
         case self::TYPE_ARRAY:
             if ($name === $this->_lastKey) {
                 //数値配列とみなす
-                if (is_array($elem[$name]) && key($elem[$name]) === 0) {
+                if (is_array($elem[$name]) && (count($elem[$name]) === 0 || key($elem[$name]) === 0)) {
                     $elem[$name][] =& $newelem;
                 } else {
                     $original = $elem[$name];
@@ -300,6 +342,11 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
         }
 
         return new self($dom, $newelem, $this);
+    }
+
+    function xmlRaw($xml)
+    {
+        return $this->xmlText($xml);
     }
 
     /**

@@ -95,4 +95,12 @@ abstract class XML_Builder_Abstract implements XML_Builder_Interface
     {
         $out = $this;
     }
+
+    /**
+     * Array用。
+     */
+    function xmlMarkArray($name)
+    {
+        return $this;
+    }
 }

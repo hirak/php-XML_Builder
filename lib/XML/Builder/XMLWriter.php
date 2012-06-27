@@ -107,6 +107,12 @@ class XML_Builder_XMLWriter extends XML_Builder_Abstract
         return $this;
     }
 
+    function xmlRaw($xml)
+    {
+        $this->xmlWriter->writeRaw($xml);
+        return $this;
+    }
+
     function __toString()
     {
         if ($this->_writeToMemory) {
