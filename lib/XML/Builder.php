@@ -132,39 +132,172 @@ abstract class XML_Builder
      * convert "XML string" to Array
      *
      */
-    static function xmlToArray($xmlString, $class='XML_Builder_Array') {
-        $builder = self::factory(array('class'=>$class));
+    static function xmlToArray($xmlString, $schema=array()) {
+
+        if (is_string($schema)) {
+            $schema = parse_ini_file($schema, true);
+        }
+        if (isset($schema)) {
+            return self::_xmlToArrayWithSchema($xmlString, $schema);
+        }
+
+        $builder = self::factory(array('class'=>'XML_Builder_Array'));
         $cursor = new XMLReader;
         $cursor->XML($xmlString, null, LIBXML_NOBLANKS);
 
+        while ($cursor->read()) switch ($cursor->nodeType) {
+            case XMLReader::ELEMENT:
+                $builder = $builder->xmlElem($cursor->name);
+                if ($cursor->hasAttributes) {
+                    $attr = array();
+                    $cursor->moveToFirstAttribute();
+                    do {
+                        $attr[$cursor->name] = $cursor->value;
+                    } while ($cursor->moveToNextAttribute());
+
+                    $builder->xmlAttr($attr);
+                    $cursor->moveToElement();
+                }
+                if ($cursor->isEmptyElement) {
+                    $builder = $builder->xmlEnd();
+                }
+                break;
+
+            case XMLReader::END_ELEMENT:
+                $builder = $builder->xmlEnd();
+                break;
+
+            case XMLReader::TEXT:
+            case XMLReader::CDATA:
+                $builder->xmlText($cursor->value);
+                break;
+        }
+
+        return $builder->xmlArray;
+    }
+
+    /**
+     * SchemaでBoxingしながらArray化する
+     *
+     */
+    private static function _xmlToArrayWithSchema($xmlString, array $schema) {
+        $builder = self::factory(array('class'=>'XML_Builder_Array'));
+        $cursor = new XMLReader;
+        $cursor->XML($xmlString, null, LIBXML_NOBLANKS);
+
+        $stack = array();
+        $l = -1;
+
         while ($cursor->read()) {
             switch ($cursor->nodeType) {
-                case XMLReader::ELEMENT:
-                    $builder = $builder->xmlElem($cursor->name);
-                    if ($cursor->hasAttributes) {
-                        $attr = array();
-                        $cursor->moveToFirstAttribute();
-                        do {
-                            $attr[$cursor->name] = $cursor->value;
-                        } while($cursor->moveToNextAttribute());
-                        $builder->xmlAttr($attr);
-                        $cursor->moveToElement();
+            case XMLReader::ELEMENT:
+                $stack[] = array($cursor->namespaceURI, $cursor->localName);
+                ++$l;
+
+                $builder = $builder->xmlElem($cursor->name);
+                if ($cursor->hasAttributes) {
+                    $attr = array();
+                    $cursor->moveToFirstAttribute();
+                    do {
+                        if (isset($schema[$cursor->namespaceURI], $schema[$cursor->namespaceURI]['@'.$cursor->localName])) {
+                            $s = $schema[$cursor->namespaceURI]['@'.$cursor->localName];
+                        } elseif (isset($schema['@'.$cursor->localName])) {
+                            $s = $schema['@'.$cursor->localName];
+                        } else {
+                            $s = null;
+                        }
+
+                        $val = self::_schemaCast($s, $cursor->value);
+                        $attr[$cursor->name] = $val;
+                    } while ($cursor->moveToNextAttribute());
+
+                    $builder->xmlAttr($attr);
+                    $cursor->moveToElement();
+                }
+                if ($cursor->isEmptyElement) {
+                    $s = self::_schemaFind($schema, $stack, $l);
+
+                    if ($s) {
+                        if ($s === 'string' || $s === 'str') {
+                            $builder->xmlText('');
+                        } elseif (preg_match('/^complex (.*)/', $s, $m)) {
+                            $complex = str_replace(' ', '', $m[1]);
+                            $complex = explode(',', $complex);
+                            foreach ($complex as $c) {
+                                if (preg_match('/^(.*)\[\]$/', $c, $m) && !isset($builder->xmlCurrentElem[$m[1]])) {
+                                    $builder->xmlMarkArray($m[1]);
+                                } elseif (!isset($builder->xmlCurrentElem[$c])) {
+                                    $builder->xmlElem($c)->xmlEnd();
+                                }
+                            }
+                        }
                     }
-                    if ($cursor->isEmptyElement) {
-                        $builder = $builder->xmlEnd();
-                    }
-                    break;
-                case XMLReader::END_ELEMENT:
                     $builder = $builder->xmlEnd();
-                    break;
-                case XMLReader::TEXT:
-                case XMLReader::CDATA:
-                    $builder->xmlText($cursor->value);
-                    break;
+                    array_pop($stack);
+                    --$l;
+                }
+                break;
+
+            case XMLReader::END_ELEMENT:
+                $s = self::_schemaFind($schema, $stack, $l);
+
+                if ($s) {
+                    if ($s === 'string' || $s === 'str') {
+                        $builder->xmlText('');
+                    } elseif (preg_match('/^complex (.*)/', $s, $m)) {
+                        $complex = str_replace(' ', '', $m[1]);
+                        $complex = explode(',', $complex);
+                        foreach ($complex as $c) {
+                            if (preg_match('/^(.*)\[\]$/', $c, $m) && !isset($builder->xmlCurrentElem[$m[1]])) {
+                                $builder->xmlMarkArray($m[1]);
+                            } elseif (!isset($builder->xmlCurrentElem[$c])) {
+                                $builder->xmlElem($c)->xmlEnd();
+                            }
+                        }
+                    }
+                }
+                $builder = $builder->xmlEnd();
+                array_pop($stack);
+                --$l;
+                break;
+
+            case XMLReader::TEXT:
+            case XMLReader::CDATA:
+                $s = self::_schemaFind($schema, $stack, $l);
+                $val = self::_schemaCast($s, $cursor->value);
+                $builder->xmlText($val);
+                break;
             }
         }
 
         return $builder->xmlArray;
+    }
+
+    private static function _schemaCast($s, $value) {
+        switch ($s) {
+            case 'integer': case 'int':
+                return (int) $value;
+            case 'double': case 'float': case 'real':
+                return (float) $value;
+            case 'boolean': case 'bool':
+                return ($value == 'true' || $value == '1');
+            case 'dateTime':
+                return new DateTime($value);
+            case 'string': case 'text':
+                return (string)$value;
+            default:
+                return $value;
+        }
+    }
+
+    private static function _schemaFind($schema, $stack, $l) {
+        if (isset($schema[$stack[$l][0]], $schema[$stack[$l][0]][$stack[$l][1]])) {
+            return $schema[$stack[$l][0]][$stack[$l][1]];
+        } elseif (isset($schema[$stack[$l][1]])) {
+            return $schema[$stack[$l][1]];
+        } else {
+            return null;
+        }
     }
 
     /**
