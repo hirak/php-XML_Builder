@@ -6,7 +6,7 @@
  * PHPUnitが必要です。
  *
  */
-error_reporting(E_ALL|E_STRICT);
+error_reporting(-1);
 
 require_once dirname(__FILE__) . '/../lib/XML/Builder.php';
 class XML_BuilderTest extends PHPUnit_Framework_TestCase
