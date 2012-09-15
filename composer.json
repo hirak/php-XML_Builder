@@ -11,7 +11,7 @@
             "email": "hiraku@tojiru.net"
         }
     ],
-    "requires": {
+    "require": {
         "php": ">=5.2.10"
     },
     "autoload": {
