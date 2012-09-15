@@ -1,5 +1,5 @@
 {
-    "name": "hiraku/XML_Builder",
+    "name": "hiraku/xml_builder",
     "description": "Simple DSL for building XML",
     "keywords": ["xml","array","dom"],
     "homepage": "http://hirak.github.com/xmlbuilder/",
