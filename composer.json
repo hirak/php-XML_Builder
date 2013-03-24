@@ -1,20 +1,25 @@
 {
-    "name": "hiraku/xml_builder",
-    "description": "Simple DSL for building XML",
-    "keywords": ["xml","array","dom"],
-    "homepage": "http://hirak.github.com/xmlbuilder/",
-    "version": "1.4.0",
-    "license": "MIT",
-    "authors": [
+    "name": "hiraku/xml_builder"
+    ,"description": "Simple DSL for building XML"
+    ,"keywords": ["xml","array","dom","json"]
+    ,"homepage": "http://hirak.github.com/xmlbuilder/"
+    ,"license": "MIT"
+    ,"authors": [
         {
-            "name": "Hiraku NAKANO",
-            "email": "hiraku@tojiru.net"
+            "name": "Hiraku NAKANO"
+            ,"email": "hiraku@tojiru.net"
         }
-    ],
-    "require": {
+    ]
+    ,"require": {
         "php": ">=5.2.10"
-    },
-    "autoload": {
-        "psr-0": {"XML_Builder": "lib/"}
+        ,"ext-xmlreader": "*"
+    }
+    ,"suggest": {
+        "ext-json": "*"
+        ,"ext-xmlwriter": "*"
+        ,"ext-dom": "*"
+    }
+    ,"autoload": {
+        "files": ["src/XML/Builder.php"]
     }
 }
