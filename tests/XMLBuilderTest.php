@@ -1,4 +1,3 @@
-#!/usr/bin/env phpunit --colors
 <?php
 /**
  * テストの起動スクリプト
@@ -6,9 +5,6 @@
  * PHPUnitが必要です。
  *
  */
-error_reporting(-1);
-
-require_once dirname(__FILE__) . '/../lib/XML/Builder.php';
 class XML_BuilderTest extends PHPUnit_Framework_TestCase
 {
     function testDOM() {

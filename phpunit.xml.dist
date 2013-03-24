@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+  colors="true"
+  bootstrap="vendor/autoload.php">
+  <logging>
+    <log type="coverage-html" target="coverage" charset="UTF-8"
+        highlight="true"/>
+  </logging>
+  <filter>
+    <blacklist>
+      <directory suffix=".php">vendor/</directory>
+    </blacklist>
+  </filter>
+  <testsuite name="XML_Builder Test Suite">
+    <directory>tests/</directory>
+  </testsuite>
+</phpunit>
+<!-- vim: set sw=2 sts=2: -->
