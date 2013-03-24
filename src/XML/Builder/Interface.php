@@ -4,16 +4,9 @@
  *
  * builder interface
  *
- * PHP versions 5
- *
- * LICENSE: MIT License
- *
- * @category  XML
- * @package   XML_Builder
  * @author    Hiraku NAKANO <hiraku@tojiru.net>
- * @copyright 2012 Hiraku NAKANO
- * @license   http://www.opensource.org/licenses/mit-license.php MIT License
- * @link      http://openpear.org/packages/XML_Builder
+ * @license   https://github.com/hirak/php-XML_Builder/blob/master/LICENSE.md MIT License
+ * @link      https://packagist.org/packages/hiraku/xml_builder
  */
 
 /**
@@ -21,12 +14,9 @@
  *
  * interface
  *
- * @category  XML
- * @package   XML_Builder
  * @author    Hiraku NAKANO <hiraku@tojiru.net>
- * @copyright 2012 Hiraku NAKANO
- * @license   http://www.opensource.org/licenses/mit-license.php MIT License
- * @link      http://openpear.org/packages/XML_Builder
+ * @license   https://github.com/hirak/php-XML_Builder/blob/master/LICENSE.md MIT License
+ * @link      https://packagist.org/packages/hiraku/xml_builder
  */
 interface XML_Builder_Interface
 {

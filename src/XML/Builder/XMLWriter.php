@@ -4,16 +4,9 @@
  *
  * XML_Builder_XMLWriter class file
  *
- * PHP versions 5
- *
- * LICENSE: MIT License
- *
- * @category  XML
- * @package   XML_Builder
  * @author    Hiraku NAKANO <hiraku@tojiru.net>
- * @copyright 2012 Hiraku NAKANO
- * @license   http://www.opensource.org/licenses/mit-license.php MIT License
- * @link      http://openpear.org/packages/XML_Builder
+ * @license   https://github.com/hirak/php-XML_Builder/blob/master/LICENSE.md MIT License
+ * @link      https://packagist.org/packages/hiraku/xml_builder
  */
 
 if (!class_exists('XML_Builder_Abstract', false)) {
@@ -25,12 +18,9 @@ if (!class_exists('XML_Builder_Abstract', false)) {
  *
  * XMLWriterのWrapper. DOMよりメモリの消費量が少ない。
  *
- * @category  XML
- * @package   XML_Builder
  * @author    Hiraku NAKANO <hiraku@tojiru.net>
- * @copyright 2012 Hiraku NAKANO
- * @license   http://www.opensource.org/licenses/mit-license.php MIT License
- * @link      http://openpear.org/packages/XML_Builder
+ * @license   https://github.com/hirak/php-XML_Builder/blob/master/LICENSE.md MIT License
+ * @link      https://packagist.org/packages/hiraku/xml_builder
  */
 class XML_Builder_XMLWriter extends XML_Builder_Abstract
 {

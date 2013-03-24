@@ -4,26 +4,16 @@
  *
  * XML_Builderの具象クラス・配列版
  *
- * PHP versions 5
- *
- * LICENSE: MIT License
- *
- * @category  XML
- * @package   XML_Builder
  * @author    Hiraku NAKANO <hiraku@tojiru.net>
- * @copyright 2012 Hiraku NAKANO
- * @license   http://www.opensource.org/licenses/mit-license.php MIT License
- * @link      http://openpear.org/packages/XML_Builder
+ * @license   https://github.com/hirak/php-XML_Builder/blob/master/LICENSE MIT License
+ * @link      https://packagist.org/packages/hiraku/xml_builder
  */
 
 if (!class_exists('XML_Builder_Abstract', false)) {
     require_once dirname(__FILE__).'/Abstract.php';
 }
-//for version < PHP5.4
+// polyfill for version < PHP5.4
 if (!interface_exists('JsonSerializable', false)) {
-    /*
-     * PHP5.4に付属しているjson_encode用のインターフェース
-     */
     interface JsonSerializable
     {
         function jsonSerialize();
@@ -36,12 +26,9 @@ if (!interface_exists('JsonSerializable', false)) {
  * XML_Builderと見せかけてPHPの配列を作るだけのクラス。
  * 同じインターフェースで出力を差し替えたい場合にどうぞ。
  *
- * @category  XML
- * @package   XML_Builder
  * @author    Hiraku NAKANO <hiraku@tojiru.net>
- * @copyright 2012 Hiraku NAKANO
- * @license   http://www.opensource.org/licenses/mit-license.php MIT License
- * @link      http://openpear.org/packages/XML_Builder
+ * @license   https://github.com/hirak/php-XML_Builder/blob/master/LICENSE MIT License
+ * @link      https://packagist.org/packages/hiraku/xml_builder
  */
 class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
 {
