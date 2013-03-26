@@ -7,9 +7,9 @@
         highlight="true"/>
   </logging>
   <filter>
-    <blacklist>
-      <directory suffix=".php">vendor/</directory>
-    </blacklist>
+    <whitelist>
+      <directory suffix=".php">src/</directory>
+    </whitelist>
   </filter>
   <testsuite name="XML_Builder Test Suite">
     <directory>tests/</directory>

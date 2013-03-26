@@ -18,7 +18,7 @@ class XML_BuilderTest extends PHPUnit_Framework_TestCase
 
             $php = include $tests[$i];
             $php = (string)$php;
-            $this->assertXmlStringEqualsXmlFile($xmls[$i], $php, $tests[$i]);
+            self::assertXmlStringEqualsXmlFile($xmls[$i], $php, $tests[$i]);
         }
     }
 
@@ -33,7 +33,7 @@ class XML_BuilderTest extends PHPUnit_Framework_TestCase
 
             $php = include $tests[$i];
             $php = (string)$php;
-            $this->assertXmlStringEqualsXmlFile($xmls[$i], $php, $tests[$i]);
+            self::assertXmlStringEqualsXmlFile($xmls[$i], $php, $tests[$i]);
         }
     }
 
@@ -52,7 +52,7 @@ class XML_BuilderTest extends PHPUnit_Framework_TestCase
 
             $php = include $tests[$i];
             $arr = include $arrays[$i];
-            $this->assertEquals($arr, $php->xmlArray, $tests[$i]);
+            self::assertEquals($arr, $php->xmlArray, $tests[$i]);
         }
     }
 
@@ -69,12 +69,12 @@ _XML_;
         $builder = XML_Builder::factory(array('doctype'=>XML_Builder::$HTML5, 'formatOutput'=>false));
         $builder->html_();
         $generated = $builder->__toString();
-        $this->assertXmlStringEqualsXmlString($expect, $generated);
+        self::assertXmlStringEqualsXmlString($expect, $generated);
 
         $builder = XML_Builder::factory(array('class'=>'xmlwriter','doctype'=>XML_Builder::$HTML5, 'formatOutput'=>false));
         $builder->html_();
         $generated = $builder->__toString();
-        $this->assertXmlStringEqualsXmlString($expect, $generated);
+        self::assertXmlStringEqualsXmlString($expect, $generated);
     }
 
     /**
@@ -96,7 +96,7 @@ _XML_;
                 ->elem_('hoge')
                 ->xmlPause($builder2);
 
-        $this->assertEqualXMLStructure($builder2->xmlCurrentElem, $builder->xmlCurrentElem);
+        self::assertEqualXMLStructure($builder2->xmlCurrentElem, $builder->xmlCurrentElem);
 
     }
     function addElem($builder) {
@@ -140,10 +140,10 @@ _XML_;
      *
      */
     function testXMLWriterWriteTo() {
-        XML_Builder::factory(array('class'=>'xmlwriter','writeto'=>'writeto.xml'))
+        XML_Builder::factory(array('class'=>'xmlwriter','writeto'=>dirname(__FILE__).'/writeto.xml'))
             ->root_;
 
-        $this->assertXmlFileEqualsXmlFile('test001.xml', 'writeto.xml');
+        self::assertXmlFileEqualsXmlFile(dirname(__FILE__).'/test001.xml', dirname(__FILE__).'/writeto.xml');
     }
 
     /**
