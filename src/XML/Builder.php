@@ -402,3 +402,7 @@ abstract class XML_Builder
         return yaml_emit(current($data));
     }
 }
+
+function XML_Builder(array $option=array()) {
+    return XML_Builder::factory($option);
+}

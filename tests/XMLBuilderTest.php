@@ -14,7 +14,7 @@ class XML_BuilderTest extends PHPUnit_Framework_TestCase
         $length = min(count($tests), count($xmls));
 
         for ($i=0; $i<$length; $i++) {
-            $builder = XML_Builder::factory();
+            $builder = xml_builder();
 
             $php = include $tests[$i];
             $php = (string)$php;
@@ -29,7 +29,7 @@ class XML_BuilderTest extends PHPUnit_Framework_TestCase
         $length = min(count($tests), count($xmls));
 
         for ($i=0; $i<$length; $i++) {
-            $builder = XML_Builder::factory(array('class'=>'xmlwriter'));
+            $builder = xml_builder(array('class'=>'xmlwriter'));
 
             $php = include $tests[$i];
             $php = (string)$php;
@@ -48,7 +48,7 @@ class XML_BuilderTest extends PHPUnit_Framework_TestCase
         $length = min(count($tests), count($arrays));
 
         for ($i=0; $i<$length; $i++) {
-            $builder = XML_Builder::factory(array('class'=>'array'));
+            $builder = xml_builder(array('class'=>'array'));
 
             $php = include $tests[$i];
             $arr = include $arrays[$i];
@@ -66,12 +66,12 @@ class XML_BuilderTest extends PHPUnit_Framework_TestCase
 <!DOCTYPE HTML>
 <html/>
 _XML_;
-        $builder = XML_Builder::factory(array('doctype'=>XML_Builder::$HTML5, 'formatOutput'=>false));
+        $builder = xml_builder(array('doctype'=>XML_Builder::$HTML5, 'formatOutput'=>false));
         $builder->html_();
         $generated = $builder->__toString();
         self::assertXmlStringEqualsXmlString($expect, $generated);
 
-        $builder = XML_Builder::factory(array('class'=>'xmlwriter','doctype'=>XML_Builder::$HTML5, 'formatOutput'=>false));
+        $builder = xml_builder(array('class'=>'xmlwriter','doctype'=>XML_Builder::$HTML5, 'formatOutput'=>false));
         $builder->html_();
         $generated = $builder->__toString();
         self::assertXmlStringEqualsXmlString($expect, $generated);
@@ -82,7 +82,7 @@ _XML_;
      *
      */
     function testControlStructures() {
-        XML_Builder::factory()
+        xml_builder()
             ->root
                 ->xmlPause($b);
                 $b
@@ -90,7 +90,7 @@ _XML_;
                 ->xmlDo(array($this, 'addElem'))
                 ->xmlExport($builder);
 
-        XML_Builder::factory()
+        xml_builder()
             ->root
                 ->elem_('hoge')
                 ->elem_('hoge')
@@ -109,7 +109,7 @@ _XML_;
      *
      */
     function testDOMRenderingHTML() {
-        XML_Builder::factory(array('doctype'=>XML_Builder::$HTML5))
+        xml_builder(array('doctype'=>XML_Builder::$HTML5))
             ->html
                 ->head
                     ->meta_(array('http-equiv'=>'Content-Type','content'=>'text/html; charset=UTF-8'))
@@ -127,7 +127,7 @@ _XML_;
         $builder->xmlEcho('html');
         $html = ob_get_clean();
 
-        $this->assertStringEqualsFile(
+        self::assertStringEqualsFile(
             dirname(__FILE__).'/expect.html',
             $html
         );
@@ -140,7 +140,7 @@ _XML_;
      *
      */
     function testXMLWriterWriteTo() {
-        XML_Builder::factory(array('class'=>'xmlwriter','writeto'=>dirname(__FILE__).'/writeto.xml'))
+        xml_builder(array('class'=>'xmlwriter','writeto'=>dirname(__FILE__).'/writeto.xml'))
             ->root_;
 
         self::assertXmlFileEqualsXmlFile(dirname(__FILE__).'/test001.xml', dirname(__FILE__).'/writeto.xml');
@@ -165,7 +165,7 @@ _XML_;
      * echo系
      */
     function testArrayEcho() {
-        XML_Builder::factory(array('class'=>'array'))
+        xml_builder(array('class'=>'array'))
             ->root_('hoge')
         ->xmlPause($builder);
 
@@ -173,7 +173,7 @@ _XML_;
         $builder->_echo();
         $res = ob_get_clean();
 
-        $this->assertEquals((string)$builder, $res);
+        self::assertEquals((string)$builder, $res);
     }
 
     /**
@@ -181,6 +181,6 @@ _XML_;
      * @expectedException InvalidArgumentException
      */
     function testException() {
-        XML_Builder::factory()->xmlDo(array($this,'use800'));
+        xml_builder()->xmlDo(array($this,'use800'));
     }
 }
