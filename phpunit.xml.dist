@@ -2,10 +2,6 @@
 <phpunit
   colors="true"
   bootstrap="src/XML/Builder.php">
-  <logging>
-    <log type="coverage-html" target="coverage" charset="UTF-8"
-        highlight="true"/>
-  </logging>
   <filter>
     <whitelist>
       <directory suffix=".php">src/</directory>
