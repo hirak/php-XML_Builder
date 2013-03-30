@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit
   colors="true"
-  bootstrap="vendor/autoload.php">
+  bootstrap="src/XML/Builder.php">
   <logging>
     <log type="coverage-html" target="coverage" charset="UTF-8"
         highlight="true"/>
