@@ -4,13 +4,6 @@
  *
  */
 
-//引数付きのシリアライザのテスト
-function serializer_dummy($data, $offset)
-{
-    $data = $data + $offset;
-    return json_encode($data);
-}
-
 class XMLBuilderArrayTest extends PHPUnit_Framework_TestCase
 {
     function testRender() {
@@ -21,14 +14,6 @@ class XMLBuilderArrayTest extends PHPUnit_Framework_TestCase
         $builder->root->hogehoge_->_;
 
         self::assertEquals('{"hogehoge":null}', $builder->_render());
-
-        $builder = xml_builder(array(
-            'class' => 'array',
-            'serializer' => array('serializer_dummy', array('additional'=>'hoge')),
-        ));
-        $builder->root->hogehoge_->_;
-
-        self::assertEquals('{"root":{"hogehoge":null},"additional":"hoge"}', $builder->_render());
     }
 
     /**

@@ -195,20 +195,13 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
     {
         if (empty($this->_serializer)) {
             return var_export($this->xmlArray, true);
-        } else {
-            if (is_callable($this->_serializer)) {
-                return call_user_func($this->_serializer, $this->xmlArray);
-            } else {
-                $args = $this->_serializer;
-                $callback = $args[0];
-                $args[0] = $this->xmlArray;
-                if (is_callable($callback)) {
-                    return call_user_func_array($callback, $args);
-                } else {
-                    throw new InvalidArgumentException('invalid serializer');
-                }
-            }
+
+        } elseif (is_callable($this->_serializer)) {
+            return call_user_func($this->_serializer, $this->xmlArray);
+
         }
+
+        throw new InvalidArgumentException('invalid serializer');
     }
 
     function xmlEcho()
