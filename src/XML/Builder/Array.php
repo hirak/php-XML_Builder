@@ -238,12 +238,15 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
             break;
         case self::TYPE_ARRAY:
             if ($name === $this->_lastKey) {
-                //数値配列とみなす
+                //配列とみなせる場合
                 if (is_array($elem[$name]) && (count($elem[$name]) === 0 || key($elem[$name]) === 0)) {
                     //何もしない
+
+                //配列以外の場合
                 } else {
+                    //配列に直す
                     $original = $elem[$name];
-                    $elem[$name] = array($original, &$newelem);
+                    $elem[$name] = array($original);
                 }
             } elseif (array_key_exists($name, $elem)) {
                 //何もしない

@@ -55,22 +55,22 @@ class XMLBuilderArrayTest extends PHPUnit_Framework_TestCase
     }
 
     function testMarkArray() {
+        //markArrayの基本機能 + 属性
         $builder = xml_builder(array(
             'class' => 'array',
             'serializer' => 'XML_Builder::json',
         ));
-
         $builder
             ->root(array('foo'=>'foo'))
                 ->_markArray('foo')
             ->_;
         self::assertEquals('{"@foo":"foo","foo":[]}', (string)$builder);
 
+        //contextが配列になっている && markはまだ存在しないとき
         $builder = xml_builder(array(
             'class' => 'array',
             'serializer' => 'XML_Builder::json',
         ));
-
         $builder
             ->root
                 ->hoge_
@@ -79,17 +79,60 @@ class XMLBuilderArrayTest extends PHPUnit_Framework_TestCase
             ->_;
         self::assertEquals('{"hoge":null,"fuga":null,"foo":[]}', (string)$builder);
 
+        //contextが配列になっている && markが既に存在するとき
+        // ->どうしようもないので、markを無視する
         $builder = xml_builder(array(
             'class' => 'array',
             'serializer' => 'XML_Builder::json',
         ));
-
         $builder
             ->root
+                ->foo_
+                ->moo_
                 ->_markArray('foo')
                 ->foo_
             ->_;
+        self::assertEquals('{"$":[{"foo":null},{"moo":null},{"foo":null}]}', (string)$builder);
+
+        //contextが配列になっている && markが既に配列として存在するとき
+        $builder = xml_builder(array(
+            'class' => 'array',
+            'serializer' => 'XML_Builder::json',
+        ));
+        $builder
+            ->root
+                ->foo_
+                ->foo_
+                ->_markArray('foo')
+            ->_;
+        self::assertEquals('{"foo":[null,null]}', (string)$builder);
+
+        //contextが配列になっている && markが既に存在するが配列でないとき
+        $builder = xml_builder(array(
+            'class' => 'array',
+            'serializer' => 'XML_Builder::json',
+        ));
+        $builder
+            ->root
+                ->foo_
+                ->_markArray('foo')
+            ->_;
         self::assertEquals('{"foo":[null]}', (string)$builder);
+
+        //contextが配列になっている && markが既に存在するが配列でないとき
+        $builder = xml_builder(array(
+            'class' => 'array',
+            'serializer' => 'XML_Builder::json',
+        ));
+        $builder
+            ->root
+                ->foo
+                    ->hoge_
+                    ->fuga_
+                ->_
+                ->_markArray('foo')
+            ->_;
+        self::assertEquals('{"foo":[{"hoge":null,"fuga":null}]}', (string)$builder);
     }
 
     /**
