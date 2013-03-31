@@ -43,10 +43,11 @@ class TranslateTest extends PHPUnit_Framework_TestCase
         self::assertEquals('b:1;', XML_Builder::serialize(array('root' => true)));
     }
 
-    /**
-     * @requires extension yaml
-     */
     function testYaml() {
+        //PHPUnit < 3.7では@requiresが効かない
+        if (! extension_loaded('yaml')) {
+            return $this->markTestSkipped();
+        }
         $generated = XML_Builder::yaml(array(
             'root' => array(
                 'str'=>'string',
@@ -86,22 +87,19 @@ _XML_;
 
         $arr = XML_Builder::domToArray($dom);
         self::assertEquals($expect, json_encode($arr));
-
-        /*
-        $schema = array(
-            'fuga' => 'int',
-            'root' => 'complex empty[]',
-        );
-
-        $arr = XML_Builder::xmlToArray($xml, $schema);
-        echo json_encode($arr, 448);
-         */
     }
 
-    function testSchema() {
+    function testDateTime() {
         $xml = '<date>2012-01-01T00:00:00</date>';
 
         $arr = XML_Builder::xmlToArray($xml, array('date'=>'dateTime'));
         self::assertInstanceOf('DateTime', $arr['date']);
+    }
+
+    function testSchema() {
+        $xml = file_get_contents('tests/samplefeed.atom');
+
+        $arr = XML_Builder::xmlToArray($xml, 'tests/schema.ini');
+        self::assertContains('entry', $arr['feed']);
     }
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:t="http://tojiru.net/ns">
+  <id>tag:tojiru.net,2013:feed</id>
+  <title>sample feed</title>
+  <updated>2013-04-01T00:00:00+09:00</updated>
+  <author>
+    <name>Hiraku Nakano</name>
+  </author>
+  <link rel="alternate" href="http://blog.tojiru.net/"/>
+  <t:float>3.14159265</t:float>
+  <t:int>314</t:int>
+  <t:bool>true</t:bool>
+  <t:str>123</t:str>
+</feed>
+<!-- vim: set sw=2 sts=2 ts=2: -->
