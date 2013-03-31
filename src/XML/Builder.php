@@ -127,7 +127,7 @@ abstract class XML_Builder
         if (is_string($schema)) {
             $schema = parse_ini_file($schema, true);
         }
-        if (isset($schema)) {
+        if ($schema) {
             return self::_xmlToArrayWithSchema($xmlString, $schema);
         }
 
@@ -305,9 +305,7 @@ abstract class XML_Builder
                 $nsList[] = $n->nodeName;
             }
 
-            if (empty($builder)) {
-                $builder = self::factory(array('class'=>'array'));
-            } elseif (is_string($builder)) {
+            if (is_string($builder) || !($builder instanceof XML_Builder_Interface)) {
                 $builder = self::factory(array('class'=>$builder));
             }
 

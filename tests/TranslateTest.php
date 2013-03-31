@@ -62,4 +62,46 @@ bool: true
 _YAML_;
         self::assertEquals($expect, $generated);
     }
+
+    function testXmlToArray()
+    {
+        $xml = <<<_XML_
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns:h="urn:example">
+  <hoge>foo</hoge>
+  <empty/>
+  <!-- comment -->
+  <fuga h:test="foo">123</fuga>
+  <fuga><![CDATA[456]]></fuga>
+</root>
+_XML_;
+        $expect = '{"root":{"@xmlns:h":"urn:example","hoge":"foo","empty":null,"fuga":[{"@h:test":"foo","$":"123"},"456"]}}';
+
+        $arr = XML_Builder::xmlToArray($xml);
+
+        self::assertEquals($expect, json_encode($arr));
+
+        $dom = new DOMDocument;
+        $dom->loadXML($xml, LIBXML_NOBLANKS);
+
+        $arr = XML_Builder::domToArray($dom);
+        self::assertEquals($expect, json_encode($arr));
+
+        /*
+        $schema = array(
+            'fuga' => 'int',
+            'root' => 'complex empty[]',
+        );
+
+        $arr = XML_Builder::xmlToArray($xml, $schema);
+        echo json_encode($arr, 448);
+         */
+    }
+
+    function testSchema() {
+        $xml = '<date>2012-01-01T00:00:00</date>';
+
+        $arr = XML_Builder::xmlToArray($xml, array('date'=>'dateTime'));
+        self::assertInstanceOf('DateTime', $arr['date']);
+    }
 }
