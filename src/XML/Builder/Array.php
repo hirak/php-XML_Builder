@@ -246,7 +246,7 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
                     $elem[$name] = array($original, &$newelem);
                 }
             } elseif (array_key_exists($name, $elem)) {
-                throw new InvalidArgumentException('xmlMarkArray()');
+                //何もしない
             } else {
                 $elem[$name] = array();
                 $this->_lastKey = $name;
