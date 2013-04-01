@@ -194,7 +194,7 @@ abstract class XML_Builder
                         if (isset($schema[$cursor->namespaceURI]['@'.$cursor->localName])) {
                             $s = $schema[$cursor->namespaceURI]['@'.$cursor->localName];
                         } elseif (isset($schema[$tagNs][$tagName.'@'.$cursor->localName])) {
-                            $s = $schema[$tagNs][$tagname.'@'.$cursor->localName];
+                            $s = $schema[$tagNs][$tagName.'@'.$cursor->localName];
                         } elseif (empty($tagNs) && isset($schema[$tagName.'@'.$cursor->localName])) {
                             $s = $schema[$tagName.'@'.$cursor->localName];
                         } else {
