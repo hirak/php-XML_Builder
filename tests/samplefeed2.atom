@@ -6,10 +6,7 @@
   <author>
     <name>Hiraku Nakano</name>
   </author>
-  <link rel="alternate" href="http://blog.tojiru.net/" t:bool="true"/>
-  <t:float>3.14159265</t:float>
-  <t:int>314</t:int>
-  <t:bool>true</t:bool>
-  <t:str>123</t:str>
+  <entry/>
 </feed>
 <!-- vim: set sw=2 sts=2 ts=2: -->
+

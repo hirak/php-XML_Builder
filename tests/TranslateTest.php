@@ -100,6 +100,15 @@ _XML_;
         $xml = file_get_contents('tests/samplefeed.atom');
 
         $arr = XML_Builder::xmlToArray($xml, 'tests/schema.ini');
-        self::assertContains('entry', $arr['feed']);
+        self::assertContains('entry', current($arr));
+
+        $xml = file_get_contents('tests/sample.xml');
+        $arr = XML_Builder::xmlToArray($xml, 'tests/schema.ini');
+
+        self::assertTrue(is_int($arr['moge']['@id']));
+        self::assertTrue(is_string($arr['moge']['$']));
+
+        $xml = file_get_contents('tests/samplefeed2.atom');
+        $arr = XML_Builder::xmlToArray($xml, 'tests/schema.ini');
     }
 }

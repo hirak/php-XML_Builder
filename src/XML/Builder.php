@@ -186,13 +186,17 @@ abstract class XML_Builder
 
                 $builder = $builder->xmlElem($cursor->name);
                 if ($cursor->hasAttributes) {
+                    $tagName = $cursor->localName;
+                    $tagNs = $cursor->namespaceURI;
                     $attr = array();
                     $cursor->moveToFirstAttribute();
                     do {
-                        if (isset($schema[$cursor->namespaceURI], $schema[$cursor->namespaceURI]['@'.$cursor->localName])) {
+                        if (isset($schema[$cursor->namespaceURI]['@'.$cursor->localName])) {
                             $s = $schema[$cursor->namespaceURI]['@'.$cursor->localName];
-                        } elseif (isset($schema['@'.$cursor->localName])) {
-                            $s = $schema['@'.$cursor->localName];
+                        } elseif (isset($schema[$tagNs][$tagName.'@'.$cursor->localName])) {
+                            $s = $schema[$tagNs][$tagname.'@'.$cursor->localName];
+                        } elseif (empty($tagNs) && isset($schema[$tagName.'@'.$cursor->localName])) {
+                            $s = $schema[$tagName.'@'.$cursor->localName];
                         } else {
                             $s = null;
                         }
@@ -214,9 +218,9 @@ abstract class XML_Builder
                             $complex = str_replace(' ', '', $m[1]);
                             $complex = explode(',', $complex);
                             foreach ($complex as $c) {
-                                if (preg_match('/^(.*)\[\]$/', $c, $m) && !isset($builder->xmlCurrentElem[$m[1]])) {
+                                if (preg_match('/^(.*)\[\]$/', $c, $m)) {
                                     $builder->xmlMarkArray($m[1]);
-                                } elseif (!isset($builder->xmlCurrentElem[$c])) {
+                                } elseif (! array_key_exists($c, (array)$builder->xmlCurrentElem)) {
                                     $builder->xmlElem($c)->xmlEnd();
                                 }
                             }
@@ -238,9 +242,9 @@ abstract class XML_Builder
                         $complex = str_replace(' ', '', $m[1]);
                         $complex = explode(',', $complex);
                         foreach ($complex as $c) {
-                            if (preg_match('/^(.*)\[\]$/', $c, $m) && !isset($builder->xmlCurrentElem[$m[1]])) {
+                            if (preg_match('/^(.*)\[\]$/', $c, $m)) {
                                 $builder->xmlMarkArray($m[1]);
-                            } elseif (!isset($builder->xmlCurrentElem[$c])) {
+                            } elseif (! array_key_exists($c, (array)$builder->xmlCurrentElem)) {
                                 $builder->xmlElem($c)->xmlEnd();
                             }
                         }
