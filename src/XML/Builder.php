@@ -77,6 +77,7 @@ abstract class XML_Builder
 
     const
         NS_XHTML = 'http://www.w3.org/1999/xhtml'
+      , NS_XML = 'http://www.w3.org/XML/1998/namespace'
       , NS_ATOM = 'http://www.w3.org/2005/Atom'
       , NS_ATOM_PUB = 'http://www.w3.org/2007/app'
       , NS_ATOM_THREAD = 'http://purl.org/syndication/thread/1.0'
@@ -86,6 +87,9 @@ abstract class XML_Builder
       , NS_RSS_10 = 'http://purl.org/rss/1.0/'
       , NS_DC = 'http://purl.org/dc/elements/1.1/'
       , NS_XSLT = 'http://www.w3.org/1999/XSL/Transform'
+      , NS_RELAXNG = 'http://relaxng.org/ns/structure/1.0'
+      , NS_XSD = 'http://www.w3.org/2001/XMLSchema'
+      , NS_XSI = 'http://www.w3.org/2001/XMLSchema-instance'
     ;
 
     /**
