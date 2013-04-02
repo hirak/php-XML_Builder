@@ -111,4 +111,27 @@ _XML_;
         $xml = file_get_contents('tests/samplefeed2.atom');
         $arr = XML_Builder::xmlToArray($xml, 'tests/schema.ini');
     }
+
+    function testSchemaArray() {
+        $schema = array(
+            'ul' => 'complex li[]',
+            'table' => 'complex tbody',
+        );
+
+        $xml = '<ul/>';
+        $arr = XML_Builder::xmlToArray($xml, $schema);
+        self::assertEquals(array('ul'=>array('li'=>array())), $arr);
+
+        $xml = '<ul><li/></ul>';
+        $arr = XML_Builder::xmlToArray($xml, $schema);
+        self::assertEquals(array('ul'=>array('li'=>array(null))), $arr);
+
+        $xml = '<ul><li/><li/></ul>';
+        $arr = XML_Builder::xmlToArray($xml, $schema);
+        self::assertEquals(array('ul'=>array('li'=>array(null,null))), $arr);
+
+        $xml = '<table><thead/></table>';
+        $arr = XML_Builder::xmlToArray($xml, $schema);
+        self::assertEquals(array('table'=>array('thead'=>null,'tbody'=>null)), $arr);
+    }
 }
