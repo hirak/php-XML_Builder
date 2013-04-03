@@ -36,7 +36,7 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
 
     //高速化のため、タイプ判定をキャッシュして使いまわす。
     private $_type = self::TYPE_NULL, $_lastKey = null;
-    private $_serializer;
+    protected $_serializer;
 
     const TYPE_NULL       = 0 //null
         , TYPE_STRING     = 1 //"str"
@@ -255,7 +255,7 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
         return $this;
     }
 
-    function xmlElem($name)
+    function xmlElem($name, $class=__CLASS__)
     {
         $dom =& $this->xmlArray;
         $elem =& $this->xmlCurrentElem;
@@ -324,7 +324,7 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
             break;
         }
 
-        return new self($dom, $newelem, $this);
+        return new $class($dom, $newelem, $this);
     }
 
     function xmlRaw($xml)

@@ -24,6 +24,12 @@ if (!class_exists('XML_Builder_XMLWriter', false)) {
 if (!class_exists('XML_Builder_Array', false)) {
     require_once dirname(__FILE__).'/Builder/Array.php';
 }
+if (!class_exists('XML_Builder_Json', false)) {
+    require_once dirname(__FILE__).'/Builder/Json.php';
+}
+if (!class_exists('XML_Builder_Jsonp', false)) {
+    require_once dirname(__FILE__).'/Builder/Jsonp.php';
+}
 
 /**
  * XML_Builder
@@ -113,6 +119,8 @@ abstract class XML_Builder
             'dom' => 'XML_Builder_DOM',
             'xmlwriter' => 'XML_Builder_XMLWriter',
             'array' => 'XML_Builder_Array',
+            'json' => 'XML_Builder_Json',
+            'jsonp' => 'XML_Builder_Jsonp',
         );
         if (isset($classmap[$option['class']])) {
             $option['class'] = $classmap[$option['class']];
