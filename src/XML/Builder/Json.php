@@ -16,14 +16,6 @@ class XML_Builder_Json extends XML_Builder_Array
 {
     protected $_serializer = 'XML_Builder::json';
 
-    function __construct(array $option)
-    {
-        if (!empty($option['formatOutput'])) {
-            $this->_serializer = 'XML_Builder::jsonDebug';
-        }
-        parent::__construct($option);
-    }
-
     function xmlAttr(array $attr = array())
     {
         foreach ($attr as &$val) {
