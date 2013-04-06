@@ -17,23 +17,15 @@ class XML_Builder_Jsonp extends XML_Builder_Json
 {
     protected $_callback = 'callback';
 
-    function __construct(&$array, &$elem=null, &$parent=null)
+    function __construct(array $option)
     {
-        if ($parent === null) {
-            //初期
-            if (isset($array['callback'])) {
-                if (! preg_match('/^[\w$][\w\d.[\]$]*$/', $array['callback'])) {
-                    throw new InvalidArgumentException('callback is invalid: ' . $array['callback']);
-                }
-                $this->_callback = $array['callback'];
+        if (isset($option['callback'])) {
+            if (! preg_match('/^[\w$][\w\d.[\]$]*$/', $option['callback'])) {
+                throw new InvalidArgumentException('callback is invalid: ' . $option['callback']);
             }
+            $this->_callback = $option['callback'];
         }
-        parent::__construct($array, $elem, $parent);
-    }
-
-    function xmlElem($name, $class=__CLASS__)
-    {
-        return parent::xmlElem($name, $class);
+        parent::__construct($option);
     }
 
     function xmlRender()

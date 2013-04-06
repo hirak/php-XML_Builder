@@ -16,9 +16,17 @@ class XML_Builder_Json extends XML_Builder_Array
 {
     protected $_serializer = 'XML_Builder::json';
 
+    function __construct(array $option)
+    {
+        if (!empty($option['formatOutput'])) {
+            $this->_serializer = 'XML_Builder::jsonDebug';
+        }
+        parent::__construct($option);
+    }
+
     function xmlAttr(array $attr = array())
     {
-        foreach ($attr as $key => &$val) {
+        foreach ($attr as &$val) {
             if ($val instanceof DateTime) {
                 $val = $val->format('c');
             }
@@ -34,10 +42,5 @@ class XML_Builder_Json extends XML_Builder_Array
         }
 
         return parent::xmlText($str);
-    }
-
-    function xmlElem($name, $class=__CLASS__)
-    {
-        return parent::xmlElem($name, $class);
     }
 }

@@ -26,43 +26,39 @@ class XML_Builder_DOM extends XML_Builder_Abstract
 {
     public $xmlDom, $xmlCurrentElem, $xmlParent;
 
-    function __construct()
+    function __construct(array $option)
     {
-        if (func_num_args() === 1) {
-            $option = func_get_arg(0);
-            if (is_array($option['doctype'])) {
-                list($qualifiedName, $publicId, $systemId) = $option['doctype'];
-                $impl = new DOMImplementation;
-                $dtype = $impl->createDocumentType(
-                    $qualifiedName,
-                    $publicId,
-                    $systemId
-                );
-                $dom = $impl->createDocument(null, null, $dtype);
-                $dom->formatOutput = $option['formatOutput'];
-                $dom->resolveExternals = true;
-                $dom->xmlVersion = $option['version'];
-                $dom->encoding = $option['encoding'];
-            } else {
-                $dom = new DOMDocument($option['version'], $option['encoding']);
-                $dom->formatOutput = $option['formatOutput'];
-            }
-            $this->xmlDom = $dom;
-            $this->xmlCurrentElem = $dom;
+        if (is_array($option['doctype'])) {
+            list($qualifiedName, $publicId, $systemId) = $option['doctype'];
+            $impl = new DOMImplementation;
+            $dtype = $impl->createDocumentType(
+                $qualifiedName,
+                $publicId,
+                $systemId
+            );
+            $dom = $impl->createDocument(null, null, $dtype);
+            $dom->formatOutput = $option['formatOutput'];
+            $dom->resolveExternals = true;
+            $dom->xmlVersion = $option['version'];
+            $dom->encoding = $option['encoding'];
         } else {
-            list(
-                $this->xmlDom,
-                $this->xmlCurrentElem,
-                $this->xmlParent
-            ) = func_get_args();
+            $dom = new DOMDocument($option['version'], $option['encoding']);
+            $dom->formatOutput = $option['formatOutput'];
         }
+        $this->xmlDom = $dom;
+        $this->xmlCurrentElem = $dom;
     }
 
     function xmlElem($name)
     {
         $elem = $this->xmlDom->createElement($name);
         $this->xmlCurrentElem->appendChild($elem);
-        return new self($this->xmlDom, $elem, $this);
+        $next = clone $this;
+        //$next->xmlDom = $this->xmlDom;
+        $next->xmlCurrentElem = $elem;
+        $next->xmlParent = $this;
+
+        return $next;
     }
 
     function xmlEnd()

@@ -55,21 +55,14 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
      *
      * @return null
      */
-    function __construct(&$array, &$elem=null, &$parent=null)
+    function __construct(array $option)
     {
-        if ($parent === null) {
-            //初期
-            if (!empty($array['serializer'])) {
-                $this->_serializer = $array['serializer'];
-            }
-            $newelem = null;
-            $this->xmlArray =& $newelem;
-            $this->xmlCurrentElem =& $newelem;
-            return;
+        if (!empty($option['serializer'])) {
+            $this->_serializer = $option['serializer'];
         }
-        $this->xmlArray =& $array;
-        $this->xmlCurrentElem =& $elem;
-        $this->xmlParent =& $parent;
+        $newelem = null;
+        $this->xmlArray =& $newelem;
+        $this->xmlCurrentElem =& $newelem;
     }
 
     /**
@@ -255,7 +248,7 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
         return $this;
     }
 
-    function xmlElem($name, $class=__CLASS__)
+    function xmlElem($name)
     {
         $dom =& $this->xmlArray;
         $elem =& $this->xmlCurrentElem;
@@ -324,7 +317,14 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
             break;
         }
 
-        return new $class($dom, $newelem, $this);
+        $next = clone $this;
+        $next->xmlArray =& $dom;
+        $next->xmlCurrentElem =& $newelem;
+        $next->xmlParent =& $this;
+        $next->_type = self::TYPE_NULL;
+        $next->_lastKey = null;
+
+        return $next;
     }
 
     function xmlRaw($xml)

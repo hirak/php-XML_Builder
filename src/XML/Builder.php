@@ -30,6 +30,9 @@ if (!class_exists('XML_Builder_Json', false)) {
 if (!class_exists('XML_Builder_Jsonp', false)) {
     require_once dirname(__FILE__).'/Builder/Jsonp.php';
 }
+if (!class_exists('XML_Builder_Serialize', false)) {
+    require_once dirname(__FILE__).'/Builder/Serialize.php';
+}
 
 /**
  * XML_Builder
@@ -119,11 +122,13 @@ abstract class XML_Builder
             'dom' => 'XML_Builder_DOM',
             'xmlwriter' => 'XML_Builder_XMLWriter',
             'array' => 'XML_Builder_Array',
-            'json' => 'XML_Builder_Json',
-            'jsonp' => 'XML_Builder_Jsonp',
         );
         if (isset($classmap[$option['class']])) {
             $option['class'] = $classmap[$option['class']];
+        }
+        $classname = 'XML_Builder_' . ucfirst($option['class']);
+        if (class_exists($classname)) {
+            $option['class'] = $classname;
         }
 
         $class = $option['class'];
@@ -370,30 +375,6 @@ abstract class XML_Builder
         }
 
         return $b->xmlEnd();
-    }
-
-    //translator for xml
-    static function toXsdType($data)
-    {
-        if (is_bool($data)) {
-            return $data ? 'true' : 'false';
-        } elseif ($data instanceof DateTime) {
-            return $data->format('c');
-        } else {
-            return $data;
-        }
-    }
-
-    //translator for json
-    static function toJsonType($data)
-    {
-        if ($data instanceof DateTime) {
-            return $data->format('c');
-        } elseif (method_exists($data, '__toString')) {
-            return (string)$data;
-        } else {
-            return $data;
-        }
     }
 
     //without root node
