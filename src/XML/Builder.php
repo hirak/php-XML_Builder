@@ -24,6 +24,9 @@ if (!class_exists('XML_Builder_XMLWriter', false)) {
 if (!class_exists('XML_Builder_Array', false)) {
     require_once dirname(__FILE__).'/Builder/Array.php';
 }
+if (!class_exists('XML_Builder_Lint', false)) {
+    require_once dirname(__FILE__).'/Builder/Lint.php';
+}
 if (!class_exists('XML_Builder_Json', false)) {
     require_once dirname(__FILE__).'/Builder/Json.php';
 }
