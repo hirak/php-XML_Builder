@@ -9,15 +9,21 @@ if (! class_exists('XML_Builder_Abstract', false)) {
 
 class XML_Builder_Lint extends XML_Builder_Abstract
 {
-    protected $_stack = array(), $_error=false;
+    protected $_stack = array(), $_error=false, $_rootNode=false;
 
     function xmlElem($name)
     {
         if (! $this->xmlIsStringCastable($name)) {
             $this->_error = true;
-            trigger_error('$name must be string-castable.', E_USER_WARNING);
+            throw new DomainException('$name must be string-castable.');
+        }
+
+        if (empty($this->_stack) && $this->_rootNode) {
+            throw new DomainException('Root node must be one.');
         }
         array_push($this->_stack, $name);
+
+        $this->_rootNode = true;
         return $this;
     }
 
@@ -32,7 +38,7 @@ class XML_Builder_Lint extends XML_Builder_Abstract
         foreach ($attr as $name => $value) {
             if (! $this->xmlIsStringCastable($value)) {
                 $this->_error = true;
-                trigger_error("\$name($name) must be string-castable.", E_USER_WARNING);
+                throw new DomainException("\$name($name) must be string-castable.");
             }
         }
         return $this;
@@ -47,7 +53,7 @@ class XML_Builder_Lint extends XML_Builder_Abstract
     {
         if (! $this->xmlIsStringCastable($str)) {
             $this->_error = true;
-            trigger_error('$name must be string-castable.', E_USER_WARNING);
+            throw new DomainException('Text element must be string-castable.');
         }
         return $this;
     }
@@ -56,12 +62,12 @@ class XML_Builder_Lint extends XML_Builder_Abstract
     {
         if (! $this->xmlIsStringCastable($str)) {
             $this->_error = true;
-            trigger_error('XML comment must be string-castable.', E_USER_WARNING);
+            throw new DomainException('XML comment must be string-castable.');
         }
 
-        if (preg_match('/--/', $str)) {
+        if (false !== strpos($str, '--')) {
             $this->_error = true;
-            trigger_error('XML comment must not have "--"', E_USER_WARNING);
+            throw new DomainException('XML comment must not contain "--".');
         }
         return $this;
     }
@@ -70,7 +76,7 @@ class XML_Builder_Lint extends XML_Builder_Abstract
     {
         if (! $this->xmlIsStringCastable($target) || ! $this->xmlIsStringCastable($data)) {
             $this->_error = true;
-            trigger_error('ProcessingInstruction must be string-castable.', E_USER_WARNING);
+            throw new DomainException('ProcessingInstruction must be string-castable.');
         }
         return $this;
     }
@@ -85,7 +91,7 @@ class XML_Builder_Lint extends XML_Builder_Abstract
         $remains = count($this->_stack);
         if ($remains > 0) {
             $this->_error = true;
-            throw new LogicException('Opening and ending tag mismatch: ' . implode(',', $this->_stack));
+            throw new DomainException('Opening and ending tag mismatch: ' . implode(',', $this->_stack));
         }
 
         return $this->_error ? 'ng' : 'ok';
@@ -115,8 +121,8 @@ class XML_Builder_Lint extends XML_Builder_Abstract
                 if ($mixed instanceof DateTime) {
                     return true;
                 }
+            default:
+                return false;
         }
-
-        return false;
     }
 }

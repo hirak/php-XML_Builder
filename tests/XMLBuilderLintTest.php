@@ -9,7 +9,7 @@ class XMLBuilderLintTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @test
-     * @expectedException PHPUnit_Framework_Error_Warning
+     * @expectedException DomainException
      */
     function ElementNameMustBeString() {
         $b = $this->newBuilder();
@@ -20,7 +20,18 @@ class XMLBuilderLintTest extends PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @expectedException PHPUnit_Framework_Error_Warning
+     * @expectedException DomainException
+     */
+    function RootNodeMustBeOne() {
+        $b = $this->newBuilder();
+
+        $b->root_;
+        $b->root_;
+    }
+
+    /**
+     * @test
+     * @expectedException DomainException
      */
     function AttributesMustBeString() {
         $b = $this->newBuilder();
@@ -35,33 +46,55 @@ class XMLBuilderLintTest extends PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @expectedException PHPUnit_Framework_Error_Warning
+     * @expectedException DomainException
      */
     function CdataMustBeString() {
         $b = $this->newBuilder();
 
-        $b->xmlCdata(array())
-            ->_;
+        $b->xmlElem('abc')
+            ->xmlCdata(array())
+        ->_;
         (string)$b;
     }
 
     /**
      * @test
-     * @expectedException PHPUnit_Framework_Error_Warning
+     * @expectedException DomainException
      */
     function processingInstructionMustBeString() {
         $b = $this->newBuilder();
 
-        $b->xmlPi(fopen('php://input'))
-            ->_;
+        $b->xmlPi(array(), array());
         (string)$b;
     }
 
     /**
      * @test
-     * @expectedException LogicException
+     * @expectedException DomainException
      */
-    function remains() {
+    function commentMustBeString() {
+        $b = $this->newBuilder();
+
+        $b->xmlComment(fopen('php://input', 'r'));
+        (string)$b;
+    }
+
+    /**
+     * @test
+     * @expectedException DomainException
+     */
+    function commentMustNotHaveDoubleHyphen() {
+        $b = $this->newBuilder();
+
+        $b->xmlComment('hogehoge--');
+        (string)$b;
+    }
+
+    /**
+     * @test
+     * @expectedException DomainException
+     */
+    function YouForgotEndingTag() {
         $b = $this->newBuilder();
 
         $b->root;
@@ -75,7 +108,7 @@ class XMLBuilderLintTest extends PHPUnit_Framework_TestCase
         $b = $this->newBuilder();
 
         $b
-            ->root
+            ->root(array('str'=>'string', 'xmlns'=>'hogehoge'))
                 ->bool_(true)
                 ->float_(1.1)
                 ->int_(5)
@@ -83,6 +116,7 @@ class XMLBuilderLintTest extends PHPUnit_Framework_TestCase
                 ->xmlText('some string')
                 ->xmlRaw('<string/>')
                 ->xmlPi('php', 'echo "Hello world";')
+                ->xmlComment('test comment')
                 ->date_(new DateTime)
                 ->object_(new DummyObject)
             ->_;

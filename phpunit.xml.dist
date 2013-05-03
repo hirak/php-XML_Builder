@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit
   colors="true"
+  convertErrorsToExceptions="true"
+  convertNoticesToExceptions="true"
+  convertWarningsToExceptions="true"
   bootstrap="src/XML/Builder.php">
   <filter>
     <whitelist>
