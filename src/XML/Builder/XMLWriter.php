@@ -67,6 +67,7 @@ class XML_Builder_XMLWriter extends XML_Builder_Abstract
     {
         $writer = $this->xmlWriter;
         foreach ($attr as $label => $value) {
+            $value = $this->xmlFilter($value);
             $writer->writeAttribute($label, $value);
         }
         return $this;
@@ -80,6 +81,7 @@ class XML_Builder_XMLWriter extends XML_Builder_Abstract
 
     function xmlText($str)
     {
+        $str = $this->xmlFilter($str);
         $this->xmlWriter->text($str);
         return $this;
     }

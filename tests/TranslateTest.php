@@ -114,4 +114,20 @@ _XML_;
         $arr = XML_Builder::xmlToArray($xml, $schema);
         self::assertEquals(array('table'=>array('thead'=>null,'tbody'=>null)), $arr);
     }
+
+    function testFilteredVar() {
+        $builder = xml_builder(array('class' => 'array', 'filter' => 'TranslateTest::stringify'));
+        $builder->xmlElem('root')
+            ->xmlText(array(1,2,3))
+        ->xmlEnd();
+
+        self::assertEquals('[1,2,3]', $builder->xmlArray['root']);
+    }
+
+    static function stringify($var) {
+        if (is_array($var)) {
+            return json_encode($var);
+        }
+        return $var;
+    }
 }

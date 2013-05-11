@@ -70,6 +70,7 @@ class XML_Builder_DOM extends XML_Builder_Abstract
     {
         $elem = $this->xmlCurrentElem;
         foreach ($attr as $label => $value) {
+            $value = $this->xmlFilter($value);
             $elem->setAttribute($label, $value);
         }
         return $this;
@@ -84,6 +85,7 @@ class XML_Builder_DOM extends XML_Builder_Abstract
 
     function xmlText($str)
     {
+        $str = $this->xmlFilter($str);
         $text = $this->xmlDom->createTextNode($str);
         $this->xmlCurrentElem->appendChild($text);
         return $this;

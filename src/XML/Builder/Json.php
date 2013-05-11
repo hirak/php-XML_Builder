@@ -16,23 +16,12 @@ class XML_Builder_Json extends XML_Builder_Array
 {
     protected $_serializer = 'XML_Builder::json';
 
-    function xmlAttr(array $attr = array())
+    protected function xmlFilter($var)
     {
-        foreach ($attr as &$val) {
-            if ($val instanceof DateTime) {
-                $val = $val->format('c');
-            }
-        } unset($val);
-
-        return parent::xmlAttr($attr);
-    }
-
-    function xmlText($str)
-    {
-        if ($str instanceof DateTime) {
-            $str = $str->format('c');
+        if ($var instanceof DateTime) {
+            $var = $var->format('c');
         }
 
-        return parent::xmlText($str);
+        return $var;
     }
 }

@@ -23,6 +23,8 @@ if (!class_exists('XML_Builder_Interface', false)) {
  */
 abstract class XML_Builder_Abstract implements XML_Builder_Interface
 {
+    public $xmlFilter = null;
+
     final function __get($name)
     {
         return $this->$name();
@@ -92,5 +94,13 @@ abstract class XML_Builder_Abstract implements XML_Builder_Interface
     function xmlMarkArray($name)
     {
         return $this;
+    }
+
+    protected function xmlFilter($var)
+    {
+        if ($this->xmlFilter) {
+            $var = call_user_func($this->xmlFilter, $var);
+        }
+        return $var;
     }
 }

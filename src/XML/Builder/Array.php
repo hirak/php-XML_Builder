@@ -100,6 +100,7 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
             break;
         }
         foreach ($attr as $label => $value) {
+            $value = $this->xmlFilter($value);
             $elem["@$label"] = $value;
         }
         $this->_lastKey = "@$label";
@@ -115,6 +116,7 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
      */
     function xmlText($str)
     {
+        $str = $this->xmlFilter($str);
         $elem =& $this->xmlCurrentElem;
         switch ($this->_type) {
         case self::TYPE_NULL:

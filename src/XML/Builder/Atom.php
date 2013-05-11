@@ -1,26 +1,25 @@
 <?php
 /**
- * XML_Builder_Serialize
+ * XML_Builder_Atom
  *
- * PHPSerialize
+ * Atom syndication format
  *
  * @author    Hiraku NAKANO <hiraku@tojiru.net>
  * @license   https://github.com/hirak/php-XML_Builder/blob/master/LICENSE MIT License
  * @link      https://packagist.org/packages/hiraku/xml_builder
  */
-
-class XML_Builder_Serialize extends XML_Builder_Array
+class XML_Builder_Atom extends XML_Builder_XMLWriter
 {
-    protected $_serializer = 'XML_Builder::serialize';
-
     protected function xmlFilter($var)
     {
-        /*
-         * MEMO: DateTime is unserializable until PHP 5.3.
-         */
-        if ($var instanceof DateTime) {
-            $var = $var->format('c');
+        if (is_bool($var)) {
+            return $var ? 'true' : 'false';
         }
+
+        if ($var instanceof DateTime) {
+            return $var->format('c');
+        }
+
         return $var;
     }
 }

@@ -2,13 +2,10 @@
 /**
  * XML_Builder
  *
- * utility & constants class
- *
  * @author    Hiraku NAKANO <hiraku@tojiru.net>
  * @license   https://github.com/hirak/php-XML_Builder/blob/master/LICENSE.md MIT License
  * @link      https://packagist.org/packages/hiraku/xml_builder
  */
-
 if (!class_exists('XML_Builder_Interface', false)) {
     require_once dirname(__FILE__).'/Builder/Interface.php';
 }
@@ -35,6 +32,9 @@ if (!class_exists('XML_Builder_Jsonp', false)) {
 }
 if (!class_exists('XML_Builder_Serialize', false)) {
     require_once dirname(__FILE__).'/Builder/Serialize.php';
+}
+if (!class_exists('XML_Builder_Atom', false)) {
+    require_once dirname(__FILE__).'/Builder/Atom.php';
 }
 
 /**
@@ -118,6 +118,7 @@ abstract class XML_Builder
             'encoding' => 'UTF-8',
             'formatOutput' => true,
             'doctype' => null,
+            'filter' => null,
             'class' => 'XML_Builder_DOM'
         );
 
@@ -135,7 +136,11 @@ abstract class XML_Builder
         }
 
         $class = $option['class'];
-        return new $class($option);
+        $builder = new $class($option);
+        if (is_callable($option['filter'])) {
+            $builder->xmlFilter = $option['filter'];
+        }
+        return $builder;
     }
 
     /**
