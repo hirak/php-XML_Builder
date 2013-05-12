@@ -20,7 +20,7 @@ class XML_Builder_Jsonp extends XML_Builder_Json
     function __construct(array $option)
     {
         if (isset($option['callback'])) {
-            if (! preg_match('/^[\w$][\w\d.[\]$]*$/', $option['callback'])) {
+            if (! preg_match('/^[\w$][\w\d.[\]$]*$/s', $option['callback'])) {
                 throw new InvalidArgumentException('callback is invalid: ' . $option['callback']);
             }
             $this->_callback = $option['callback'];

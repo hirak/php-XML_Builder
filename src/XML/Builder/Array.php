@@ -27,7 +27,7 @@ if (!interface_exists('JsonSerializable', false)) {
  * 同じインターフェースで出力を差し替えたい場合にどうぞ。
  *
  * @author    Hiraku NAKANO <hiraku@tojiru.net>
- * @license   https://github.com/hirak/php-XML_Builder/blob/master/LICENSE MIT License
+ * @license   https://github.com/hirak/php-XML_Builder/blob/master/LICENSE.md MIT License
  * @link      https://packagist.org/packages/hiraku/xml_builder
  */
 class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
@@ -36,7 +36,7 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
 
     //高速化のため、タイプ判定をキャッシュして使いまわす。
     private $_type = self::TYPE_NULL, $_lastKey = null;
-    protected $_serializer;
+    protected $_serializer, $_removeRootNode = true;
 
     const TYPE_NULL       = 0 //null
         , TYPE_STRING     = 1 //"str"
@@ -59,6 +59,9 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
     {
         if (!empty($option['serializer'])) {
             $this->_serializer = $option['serializer'];
+        }
+        if (isset($option['removeRootNode'])) {
+            $this->_removeRootNode = (bool)$option['removeRootNode'];
         }
         $newelem = null;
         $this->xmlArray =& $newelem;
@@ -188,11 +191,16 @@ class XML_Builder_Array extends XML_Builder_Abstract implements JsonSerializable
 
     function xmlRender()
     {
+        if ($this->_removeRootNode) {
+            $array = current($this->xmlArray);
+        } else {
+            $array = $this->xmlArray;
+        }
         if (empty($this->_serializer)) {
-            return var_export($this->xmlArray, true);
+            return var_export($array, true);
 
         } elseif (is_callable($this->_serializer)) {
-            return call_user_func($this->_serializer, $this->xmlArray);
+            return call_user_func($this->_serializer, $array);
 
         }
 

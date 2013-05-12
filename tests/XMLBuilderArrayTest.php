@@ -9,7 +9,7 @@ class XMLBuilderArrayTest extends PHPUnit_Framework_TestCase
     function testRender() {
         $builder = xml_builder(array(
             'class' => 'array',
-            'serializer' => 'XML_Builder::json'
+            'serializer' => 'json_encode'
         ));
         $builder->root->hogehoge_->_;
 
@@ -22,6 +22,7 @@ class XMLBuilderArrayTest extends PHPUnit_Framework_TestCase
     function testRender2() {
         $builder = xml_builder(array(
             'class' => 'array',
+            'removeRootNode' => false,
             'serializer' => 'uso800',
         ));
 
@@ -31,7 +32,7 @@ class XMLBuilderArrayTest extends PHPUnit_Framework_TestCase
     function testRaw() {
         $builder = xml_builder(array(
             'class' => 'array',
-            'serializer' => 'XML_Builder::json',
+            'serializer' => 'json_encode',
         ));
 
         $builder->root->_raw('<hoge>fuga</hoge>')->_;
@@ -39,11 +40,22 @@ class XMLBuilderArrayTest extends PHPUnit_Framework_TestCase
         self::assertEquals('"<hoge>fuga<\/hoge>"', (string)$builder);
     }
 
+    function testRootNode() {
+        $builder = xml_builder(array(
+            'class' => 'array',
+            'serializer' => 'json_encode',
+            'removeRootNode' => false,
+        ));
+        $builder->root_('text');
+
+        self::assertEquals('{"root":"text"}', (string)$builder);
+    }
+
     function testMarkArray() {
         //markArrayの基本機能 + 属性
         $builder = xml_builder(array(
             'class' => 'array',
-            'serializer' => 'XML_Builder::json',
+            'serializer' => 'json_encode',
         ));
         $builder
             ->root(array('foo'=>'foo'))
@@ -54,7 +66,7 @@ class XMLBuilderArrayTest extends PHPUnit_Framework_TestCase
         //contextが配列になっている && markはまだ存在しないとき
         $builder = xml_builder(array(
             'class' => 'array',
-            'serializer' => 'XML_Builder::json',
+            'serializer' => 'json_encode',
         ));
         $builder
             ->root
@@ -68,7 +80,7 @@ class XMLBuilderArrayTest extends PHPUnit_Framework_TestCase
         // ->どうしようもないので、markを無視する
         $builder = xml_builder(array(
             'class' => 'array',
-            'serializer' => 'XML_Builder::json',
+            'serializer' => 'json_encode',
         ));
         $builder
             ->root
@@ -82,7 +94,7 @@ class XMLBuilderArrayTest extends PHPUnit_Framework_TestCase
         //contextが配列になっている && markが既に配列として存在するとき
         $builder = xml_builder(array(
             'class' => 'array',
-            'serializer' => 'XML_Builder::json',
+            'serializer' => 'json_encode',
         ));
         $builder
             ->root
@@ -95,7 +107,7 @@ class XMLBuilderArrayTest extends PHPUnit_Framework_TestCase
         //contextが配列になっている && markが既に存在するが配列でないとき
         $builder = xml_builder(array(
             'class' => 'array',
-            'serializer' => 'XML_Builder::json',
+            'serializer' => 'json_encode',
         ));
         $builder
             ->root
@@ -107,7 +119,7 @@ class XMLBuilderArrayTest extends PHPUnit_Framework_TestCase
         //contextが配列になっている && markが既に存在するが配列でないとき
         $builder = xml_builder(array(
             'class' => 'array',
-            'serializer' => 'XML_Builder::json',
+            'serializer' => 'json_encode',
         ));
         $builder
             ->root
@@ -127,7 +139,7 @@ class XMLBuilderArrayTest extends PHPUnit_Framework_TestCase
         //mixed contentはmarkArrayにできない
         $builder = xml_builder(array(
             'class' => 'array',
-            'serializer' => 'XML_Builder::json',
+            'serializer' => 'json_encode',
         ));
 
         $builder

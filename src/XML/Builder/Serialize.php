@@ -11,7 +11,7 @@
 
 class XML_Builder_Serialize extends XML_Builder_Array
 {
-    protected $_serializer = 'XML_Builder::serialize';
+    protected $_serializer = 'serialize';
 
     protected function xmlFilter($var)
     {
